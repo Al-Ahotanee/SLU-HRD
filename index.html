@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SGES HDRRC — Sule Lamido University</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+:root {
+  --ink: #0d1117;
+  --ink2: #1a2332;
+  --gold: #c9a84c;
+  --gold2: #e8c96a;
+  --cream: #f5f0e8;
+  --cream2: #ede7d9;
+  --green: #1a6b4a;
+  --green2: #2a8a62;
+  --white: #ffffff;
+  --text: #2c3e50;
+  --muted: #6b7c93;
+  --border: rgba(201,168,76,0.2);
+  --shadow: 0 20px 60px rgba(13,17,23,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:999;padding:0 5%;background:rgba(13,17,23,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:space-between;height:70px;transition:all 0.3s}
+.nav-brand{display:flex;align-items:center;gap:12px}
+.nav-logo{width:40px;height:40px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:900;color:var(--ink);font-size:18px}
+.nav-name{color:var(--white);font-size:15px;font-weight:600;line-height:1.2}
+.nav-name span{display:block;color:var(--gold);font-size:11px;font-weight:400;letter-spacing:1px;text-transform:uppercase}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{color:rgba(255,255,255,0.75);text-decoration:none;font-size:14px;font-weight:500;transition:color 0.2s}
+.nav-links a:hover{color:var(--gold)}
+.nav-cta{display:flex;gap:10px}
+.btn{padding:9px 20px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;font-family:'DM Sans',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn-ghost{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.btn-ghost:hover{background:var(--gold);color:var(--ink)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink)}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(201,168,76,0.4)}
+.btn-green{background:var(--green);color:var(--white)}
+.btn-green:hover{background:var(--green2);transform:translateY(-2px)}
+.btn-lg{padding:14px 32px;font-size:16px;border-radius:8px}
+.btn-xl{padding:16px 40px;font-size:17px;border-radius:10px}
+
+/* ── HERO ── */
+.hero{min-height:100vh;background:var(--ink);display:flex;align-items:center;position:relative;overflow:hidden;padding-top:70px}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 80% at 60% 50%,rgba(26,107,74,0.25) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 10% 80%,rgba(201,168,76,0.12) 0%,transparent 50%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 80%)}
+.hero-orb{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(26,107,74,0.3),transparent 70%);right:-100px;top:50%;transform:translateY(-50%);border-radius:50%;filter:blur(40px)}
+.hero-content{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:0 5%;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;width:100%}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);border-radius:100px;padding:6px 16px;margin-bottom:24px}
+.hero-badge span{color:var(--gold);font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.5)}}
+.hero-h1{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,64px);font-weight:900;color:var(--white);line-height:1.08;margin-bottom:20px}
+.hero-h1 em{font-style:normal;color:var(--gold)}
+.hero-sub{color:rgba(255,255,255,0.6);font-size:17px;line-height:1.7;margin-bottom:36px;font-weight:400}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap}
+.hero-stats{display:flex;gap:32px;margin-top:48px;padding-top:32px;border-top:1px solid rgba(255,255,255,0.08)}
+.hero-stat-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--gold)}
+.hero-stat-label{color:rgba(255,255,255,0.45);font-size:12px;text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+
+/* Hero right card */
+.hero-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px;backdrop-filter:blur(10px)}
+.hero-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.hc-title{color:var(--white);font-size:16px;font-weight:600}
+.hc-badge{background:rgba(26,107,74,0.25);color:#4ade80;font-size:11px;padding:4px 10px;border-radius:20px;font-weight:600}
+.module-item{display:flex;align-items:center;gap:14px;padding:12px;border-radius:10px;margin-bottom:8px;transition:background 0.2s;cursor:default}
+.module-item:hover{background:rgba(255,255,255,0.05)}
+.mi-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mi-text{flex:1}
+.mi-name{color:rgba(255,255,255,0.9);font-size:14px;font-weight:500}
+.mi-desc{color:rgba(255,255,255,0.4);font-size:12px;margin-top:2px}
+.mi-count{color:var(--gold);font-size:13px;font-weight:600}
+
+/* ── SECTION COMMONS ── */
+section{padding:100px 5%}
+.sec-label{display:inline-flex;align-items:center;gap:8px;color:var(--green);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+.sec-label::before{content:'';width:24px;height:2px;background:var(--green)}
+h2{font-family:'Playfair Display',serif;font-size:clamp(30px,4vw,48px);font-weight:800;color:var(--ink);line-height:1.15}
+.sec-sub{color:var(--muted);font-size:17px;line-height:1.7;margin-top:14px;max-width:560px}
+.max-w{max-width:1200px;margin:0 auto}
+
+/* ── CAROUSEL ── */
+.carousel-section{background:var(--ink2);overflow:hidden}
+.carousel-section h2{color:var(--white)}
+.carousel-section .sec-label{color:var(--gold)}
+.carousel-section .sec-label::before{background:var(--gold)}
+.carousel-section .sec-sub{color:rgba(255,255,255,0.5)}
+.carousel-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:48px;gap:32px}
+.carousel-track-wrap{overflow:hidden;position:relative}
+.carousel-track{display:flex;gap:24px;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1)}
+.carousel-slide{flex:0 0 calc(33.333% - 16px);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px;position:relative;overflow:hidden;transition:all 0.3s}
+.carousel-slide:hover{border-color:rgba(201,168,76,0.4);transform:translateY(-4px)}
+.cs-num{position:absolute;top:20px;right:20px;font-family:'Playfair Display',serif;font-size:48px;font-weight:900;color:rgba(255,255,255,0.04);line-height:1}
+.cs-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.cs-title{color:var(--white);font-size:18px;font-weight:700;margin-bottom:10px}
+.cs-desc{color:rgba(255,255,255,0.5);font-size:14px;line-height:1.65}
+.cs-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:20px}
+.cs-tag{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.45);font-size:11px;padding:4px 10px;border-radius:20px}
+.carousel-controls{display:flex;gap:10px;margin-top:32px;justify-content:center}
+.cc-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:var(--white)}
+.cc-btn:hover{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.cc-dots{display:flex;gap:6px;align-items:center}
+.cc-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);cursor:pointer;transition:all 0.3s}
+.cc-dot.active{background:var(--gold);width:24px;border-radius:4px}
+
+/* ── FEATURES ── */
+.features-section{background:var(--cream)}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px}
+.feat-card{background:var(--white);border:1px solid var(--cream2);border-radius:16px;padding:32px;transition:all 0.3s;position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(26,107,74,0.03));opacity:0;transition:opacity 0.3s}
+.feat-card:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:var(--gold)}
+.feat-card:hover::before{opacity:1}
+.feat-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.feat-title{font-size:18px;font-weight:700;color:var(--ink);margin-bottom:10px}
+.feat-desc{color:var(--muted);font-size:14px;line-height:1.65}
+.feat-list{margin-top:16px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.feat-list li{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+.feat-list li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+/* ── ROLES ── */
+.roles-section{background:var(--ink);padding:100px 5%}
+.roles-section h2{color:var(--white)}
+.roles-section .sec-label{color:var(--gold)}
+.roles-section .sec-label::before{background:var(--gold)}
+.roles-section .sec-sub{color:rgba(255,255,255,0.5)}
+.roles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:56px;border-radius:16px;overflow:hidden}
+.role-card{background:rgba(255,255,255,0.03);padding:48px 36px;border:1px solid rgba(255,255,255,0.06);transition:all 0.3s;cursor:default}
+.role-card:hover{background:rgba(255,255,255,0.06)}
+.role-avatar{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:24px;font-size:24px}
+.role-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--white);margin-bottom:12px}
+.role-desc{color:rgba(255,255,255,0.45);font-size:14px;line-height:1.7;margin-bottom:24px}
+.role-perms{display:flex;flex-direction:column;gap:8px}
+.rp-item{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.6);font-size:13px}
+
+/* ── STATS ── */
+.stats-section{background:linear-gradient(135deg,var(--green) 0%,var(--ink2) 100%);padding:80px 5%}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;border-radius:16px;overflow:hidden}
+.stat-item{background:rgba(255,255,255,0.06);padding:48px 36px;text-align:center;border:1px solid rgba(255,255,255,0.06)}
+.stat-num{font-family:'Playfair Display',serif;font-size:52px;font-weight:900;color:var(--gold);line-height:1}
+.stat-suffix{font-size:28px;color:var(--gold2)}
+.stat-label{color:rgba(255,255,255,0.6);font-size:14px;margin-top:10px;font-weight:500}
+.stat-icon{margin-bottom:16px;color:rgba(201,168,76,0.5)}
+
+/* ── CTA ── */
+.cta-section{background:var(--cream);padding:100px 5%;text-align:center}
+.cta-inner{background:var(--ink);border-radius:24px;padding:80px;max-width:800px;margin:0 auto;position:relative;overflow:hidden}
+.cta-inner::before{content:'';position:absolute;top:-40%;right:-20%;width:500px;height:500px;background:radial-gradient(circle,rgba(26,107,74,0.3),transparent 60%);border-radius:50%}
+.cta-inner h2{color:var(--white);margin-bottom:16px;position:relative}
+.cta-inner p{color:rgba(255,255,255,0.55);font-size:17px;line-height:1.7;margin-bottom:40px;position:relative}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative}
+.cta-demo{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.15)}
+.cta-demo:hover{background:rgba(255,255,255,0.15)}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);border-top:1px solid rgba(255,255,255,0.06);padding:60px 5% 32px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
+.footer-brand p{color:rgba(255,255,255,0.4);font-size:14px;line-height:1.7;margin:16px 0 20px}
+.footer-social{display:flex;gap:10px}
+.fs-btn{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);cursor:pointer;transition:all 0.2s;text-decoration:none}
+.fs-btn:hover{background:var(--gold);color:var(--ink)}
+.footer-col h4{color:var(--white);font-size:14px;font-weight:700;margin-bottom:16px;letter-spacing:0.5px}
+.footer-col a{display:block;color:rgba(255,255,255,0.4);font-size:14px;text-decoration:none;margin-bottom:10px;transition:color 0.2s}
+.footer-col a:hover{color:var(--gold)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.07);padding-top:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:gap}
+.footer-bottom p{color:rgba(255,255,255,0.3);font-size:13px}
+.footer-bottom a{color:var(--gold);text-decoration:none}
+
+/* ── CREDENTIALS PILL ── */
+.cred-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px 28px;margin-top:24px}
+.cred-title{color:rgba(255,255,255,0.5);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px}
+.cred-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.cred-row:last-child{border-bottom:none}
+.cred-role{color:var(--gold);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;min-width:80px}
+.cred-email{color:rgba(255,255,255,0.65);font-size:13px;font-family:monospace}
+.cred-pass{color:rgba(255,255,255,0.35);font-size:12px}
+
+/* ── ANIMATIONS ── */
+.fade-up{opacity:0;transform:translateY(30px);transition:all 0.7s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:900px){
+  .hero-content{grid-template-columns:1fr;gap:40px}
+  .features-grid,.roles-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .carousel-slide{flex:0 0 calc(90% - 12px)}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo">S</div>
+    <div class="nav-name">SGES HDRRC <span>Sule Lamido University</span></div>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#roles">Roles</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="nav-cta">
+    <a href="app.html" class="btn btn-ghost">Sign In</a>
+    <a href="app.html#register" class="btn btn-gold">Get Started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-orb"></div>
+  <div class="hero-content">
+    <div>
+      <div class="hero-badge">
+        <div class="hero-badge-dot"></div>
+        <span>SGES · Kafin Hausa · Jigawa State</span>
+      </div>
+      <h1 class="hero-h1">Human Development<br/>Resource <em>Repository</em><br/>& Courseware</h1>
+      <p class="hero-sub">An integrated enterprise platform for managing academic resources, staff development, digital repositories, and courseware in the School of General and Entrepreneurial Studies.</p>
+      <div class="hero-actions">
+        <a href="app.html" class="btn btn-gold btn-xl">
+          <i data-lucide="log-in" style="width:18px;height:18px"></i>
+          Access Platform
+        </a>
+        <a href="#features" class="btn btn-lg" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.12)">
+          <i data-lucide="play-circle" style="width:18px;height:18px"></i>
+          Explore Features
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-num">4</div>
+          <div class="hero-stat-label">Core Modules</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">3</div>
+          <div class="hero-stat-label">User Roles</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">100%</div>
+          <div class="hero-stat-label">Web-Based</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="hero-card">
+        <div class="hero-card-header">
+          <span class="hc-title">Platform Modules</span>
+          <span class="hc-badge">● Live</span>
+        </div>
+        <div class="module-item">
+          <div class="mi-icon" style="background:rgba(201,168,76,0.15)"><i data-lucide="users" style="color:#c9a84c;width:20px;height:20px"></i></div>
+          <div class="mi-text"><div class="mi-name">HR Development</div><div class="mi-desc">Staff training & performance tracking</div></div>
+          <div class="mi-count">Admin</div>
+        </div>
+        <div class="module-item">
+          <div class="mi-icon" style="background:rgba(26,107,74,0.15)"><i data-lucide="archive" style="color:#2a8a62;width:20px;height:20px"></i></div>
+          <div class="mi-text"><div class="mi-name">Digital Repository</div><div class="mi-desc">Research, thesis, journals archive</div></div>
+          <div class="mi-count">All</div>
+        </div>
+        <div class="module-item">
+          <div class="mi-icon" style="background:rgba(59,130,246,0.12)"><i data-lucide="book-open" style="color:#60a5fa;width:20px;height:20px"></i></div>
+          <div class="mi-text"><div class="mi-name">Courseware</div><div class="mi-desc">Lecture notes, assignments, materials</div></div>
+          <div class="mi-count">Staff</div>
+        </div>
+        <div class="module-item">
+          <div class="mi-icon" style="background:rgba(168,85,247,0.12)"><i data-lucide="graduation-cap" style="color:#c084fc;width:20px;height:20px"></i></div>
+          <div class="mi-text"><div class="mi-name">Student Portal</div><div class="mi-desc">Course access & material downloads</div></div>
+          <div class="mi-count">Student</div>
+        </div>
+        <div class="cred-box">
+          <div class="cred-title">Demo Credentials</div>
+          <div class="cred-row"><span class="cred-role">Admin</span><span class="cred-email">admin@sges.edu.ng</span><span class="cred-pass">Admin@1234</span></div>
+          <div class="cred-row"><span class="cred-role">Lecturer</span><span class="cred-email">amina.bello@sges.edu.ng</span><span class="cred-pass">Lecturer@1234</span></div>
+          <div class="cred-row"><span class="cred-role">Student</span><span class="cred-email">ibrahim.musa@sges.edu.ng</span><span class="cred-pass">Student@1234</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CAROUSEL -->
+<section class="carousel-section">
+  <div class="max-w">
+    <div class="carousel-header">
+      <div>
+        <div class="sec-label">Key Capabilities</div>
+        <h2>Everything SGES needs<br/>in one platform</h2>
+        <p class="sec-sub">A unified system replacing scattered files, manual records, and disconnected tools.</p>
+      </div>
+    </div>
+    <div class="carousel-track-wrap">
+      <div class="carousel-track" id="carouselTrack">
+        <div class="carousel-slide">
+          <div class="cs-num">01</div>
+          <div class="cs-icon" style="background:rgba(201,168,76,0.12)"><i data-lucide="user-check" style="color:#c9a84c;width:26px;height:26px"></i></div>
+          <div class="cs-title">Staff Development Tracking</div>
+          <div class="cs-desc">Log and monitor every training, workshop, seminar, and certification for all academic and administrative staff in SGES.</div>
+          <div class="cs-tags"><span class="cs-tag">Training logs</span><span class="cs-tag">Status tracking</span><span class="cs-tag">Certifications</span></div>
+        </div>
+        <div class="carousel-slide">
+          <div class="cs-num">02</div>
+          <div class="cs-icon" style="background:rgba(26,107,74,0.15)"><i data-lucide="database" style="color:#2a8a62;width:26px;height:26px"></i></div>
+          <div class="cs-title">Centralized Digital Repository</div>
+          <div class="cs-desc">Store, organize, and retrieve academic materials — research papers, theses, manuals, and journals — with full-text search and approval workflows.</div>
+          <div class="cs-tags"><span class="cs-tag">Research papers</span><span class="cs-tag">Theses</span><span class="cs-tag">Journals</span></div>
+        </div>
+        <div class="carousel-slide">
+          <div class="cs-num">03</div>
+          <div class="cs-icon" style="background:rgba(59,130,246,0.12)"><i data-lucide="file-text" style="color:#60a5fa;width:26px;height:26px"></i></div>
+          <div class="cs-title">Courseware Management</div>
+          <div class="cs-desc">Lecturers upload lecture notes, assignments, slides, and videos. Students access materials anytime, anywhere, for every enrolled course.</div>
+          <div class="cs-tags"><span class="cs-tag">Notes</span><span class="cs-tag">Assignments</span><span class="cs-tag">Videos</span></div>
+        </div>
+        <div class="carousel-slide">
+          <div class="cs-num">04</div>
+          <div class="cs-icon" style="background:rgba(239,68,68,0.12)"><i data-lucide="shield-check" style="color:#f87171;width:26px;height:26px"></i></div>
+          <div class="cs-title">Secure Role-Based Access</div>
+          <div class="cs-desc">Three-tier access control — Admin, Lecturer, Student — each with precisely scoped permissions. JWT-authenticated sessions with 24-hour tokens.</div>
+          <div class="cs-tags"><span class="cs-tag">JWT Auth</span><span class="cs-tag">Role guards</span><span class="cs-tag">Audit log</span></div>
+        </div>
+        <div class="carousel-slide">
+          <div class="cs-num">05</div>
+          <div class="cs-icon" style="background:rgba(168,85,247,0.12)"><i data-lucide="bar-chart-2" style="color:#c084fc;width:26px;height:26px"></i></div>
+          <div class="cs-title">Analytics & Reporting</div>
+          <div class="cs-desc">Visual dashboards with Chart.js — enrollment trends, material downloads, repository growth, staff development progress at a glance.</div>
+          <div class="cs-tags"><span class="cs-tag">Charts</span><span class="cs-tag">Statistics</span><span class="cs-tag">Trends</span></div>
+        </div>
+        <div class="carousel-slide">
+          <div class="cs-num">06</div>
+          <div class="cs-icon" style="background:rgba(234,179,8,0.12)"><i data-lucide="megaphone" style="color:#fbbf24;width:26px;height:26px"></i></div>
+          <div class="cs-title">Announcements System</div>
+          <div class="cs-desc">Broadcast institutional announcements to all users or target specific roles — students, lecturers, or staff — with instant visibility on every dashboard.</div>
+          <div class="cs-tags"><span class="cs-tag">Broadcast</span><span class="cs-tag">Role targeting</span><span class="cs-tag">Pinned notices</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="carousel-controls">
+      <button class="cc-btn" id="prevBtn"><i data-lucide="chevron-left" style="width:18px;height:18px"></i></button>
+      <div class="cc-dots" id="ccDots"></div>
+      <button class="cc-btn" id="nextBtn"><i data-lucide="chevron-right" style="width:18px;height:18px"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="max-w">
+    <div class="sec-label">Core Features</div>
+    <h2>Built for academic excellence</h2>
+    <p class="sec-sub">Every module purpose-built for the operational realities of Nigerian higher education.</p>
+    <div class="features-grid">
+      <div class="feat-card fade-up">
+        <div class="feat-icon" style="background:rgba(201,168,76,0.1)"><i data-lucide="users-round" style="color:#c9a84c;width:26px;height:26px"></i></div>
+        <div class="feat-title">Human Resource Development</div>
+        <div class="feat-desc">Track every professional development activity across the school with structured records and status management.</div>
+        <ul class="feat-list">
+          <li>Training & workshop logs</li>
+          <li>Certification tracking</li>
+          <li>Status: Planned / Ongoing / Completed</li>
+          <li>Per-staff development history</li>
+        </ul>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:0.1s">
+        <div class="feat-icon" style="background:rgba(26,107,74,0.1)"><i data-lucide="library" style="color:#1a6b4a;width:26px;height:26px"></i></div>
+        <div class="feat-title">Digital Repository</div>
+        <div class="feat-desc">Institutional archive for research outputs, theses, journals, and conference papers with admin approval workflow.</div>
+        <ul class="feat-list">
+          <li>Multi-category submissions</li>
+          <li>Admin approval pipeline</li>
+          <li>Keyword search & filters</li>
+          <li>Download tracking</li>
+        </ul>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:0.2s">
+        <div class="feat-icon" style="background:rgba(59,130,246,0.1)"><i data-lucide="book-marked" style="color:#3b82f6;width:26px;height:26px"></i></div>
+        <div class="feat-title">Courseware System</div>
+        <div class="feat-desc">Complete course material lifecycle — upload, organize by course, and enable student access with one-click enrollment.</div>
+        <ul class="feat-list">
+          <li>Notes, slides, assignments, videos</li>
+          <li>Per-course organization</li>
+          <li>Student enrollment management</li>
+          <li>Content preview & download</li>
+        </ul>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:0.1s">
+        <div class="feat-icon" style="background:rgba(239,68,68,0.1)"><i data-lucide="lock-keyhole" style="color:#ef4444;width:26px;height:26px"></i></div>
+        <div class="feat-title">Security & Access Control</div>
+        <div class="feat-desc">Enterprise-grade authentication with role-based permission scoping for every route and data operation.</div>
+        <ul class="feat-list">
+          <li>JWT-based authentication</li>
+          <li>3-tier role system</li>
+          <li>Activity audit logging</li>
+          <li>Session expiration control</li>
+        </ul>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:0.2s">
+        <div class="feat-icon" style="background:rgba(168,85,247,0.1)"><i data-lucide="pie-chart" style="color:#a855f7;width:26px;height:26px"></i></div>
+        <div class="feat-title">Admin Analytics</div>
+        <div class="feat-desc">Real-time dashboard charts showing platform usage, enrollment trends, repository growth, and staff activity.</div>
+        <ul class="feat-list">
+          <li>User & enrollment metrics</li>
+          <li>Material upload trends</li>
+          <li>Repository statistics</li>
+          <li>Development completion rates</li>
+        </ul>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:0.3s">
+        <div class="feat-icon" style="background:rgba(234,179,8,0.1)"><i data-lucide="bell-ring" style="color:#eab308;width:26px;height:26px"></i></div>
+        <div class="feat-title">Announcements</div>
+        <div class="feat-desc">Institutional notice board with targeted broadcasts to specific user roles or the entire SGES community.</div>
+        <ul class="feat-list">
+          <li>Role-targeted notices</li>
+          <li>Priority announcements</li>
+          <li>Admin broadcast controls</li>
+          <li>Dashboard integration</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROLES -->
+<section class="roles-section" id="roles">
+  <div class="max-w">
+    <div class="sec-label">User Roles</div>
+    <h2>Three roles, one platform</h2>
+    <p class="sec-sub">Each role has precisely scoped capabilities designed around real academic workflows.</p>
+    <div class="roles-grid">
+      <div class="role-card">
+        <div class="role-avatar" style="background:rgba(201,168,76,0.12)">👑</div>
+        <div class="role-title">Administrator</div>
+        <div class="role-desc">Full platform control. Manages all users, approves repository submissions, oversees courses, and accesses system analytics.</div>
+        <div class="role-perms">
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#c9a84c;width:15px;height:15px;flex-shrink:0"></i>User management (CRUD)</div>
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#c9a84c;width:15px;height:15px;flex-shrink:0"></i>Repository approval workflow</div>
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#c9a84c;width:15px;height:15px;flex-shrink:0"></i>System analytics & reporting</div>
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#c9a84c;width:15px;height:15px;flex-shrink:0"></i>Announcements broadcast</div>
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#c9a84c;width:15px;height:15px;flex-shrink:0"></i>Staff development oversight</div>
+        </div>
+      </div>
+      <div class="role-card" style="background:rgba(26,107,74,0.06)">
+        <div class="role-avatar" style="background:rgba(26,107,74,0.15)">🎓</div>
+        <div class="role-title">Lecturer</div>
+        <div class="role-desc">Manages courses and materials for assigned subjects. Submits to repository and tracks own professional development records.</div>
+        <div class="role-perms">
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#2a8a62;width:15px;height:15px;flex-shrink:0"></i>Create & manage courses</div>
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#2a8a62;width:15px;height:15px;flex-shrink:0"></i>Upload courseware materials</div>
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#2a8a62;width:15px;height:15px;flex-shrink:0"></i>Repository submissions</div>
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#2a8a62;width:15px;height:15px;flex-shrink:0"></i>Development activity logs</div>
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#2a8a62;width:15px;height:15px;flex-shrink:0"></i>View enrolled students</div>
+        </div>
+      </div>
+      <div class="role-card">
+        <div class="role-avatar" style="background:rgba(59,130,246,0.12)">📚</div>
+        <div class="role-title">Student</div>
+        <div class="role-desc">Accesses all enrolled course materials, searches the institutional repository, and stays updated via announcements.</div>
+        <div class="role-perms">
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#60a5fa;width:15px;height:15px;flex-shrink:0"></i>Browse & enroll in courses</div>
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#60a5fa;width:15px;height:15px;flex-shrink:0"></i>Download courseware</div>
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#60a5fa;width:15px;height:15px;flex-shrink:0"></i>Search repository</div>
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#60a5fa;width:15px;height:15px;flex-shrink:0"></i>Receive announcements</div>
+          <div class="rp-item"><i data-lucide="check-circle-2" style="color:#60a5fa;width:15px;height:15px;flex-shrink:0"></i>View enrolled course details</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+  <div class="max-w">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-icon"><i data-lucide="users" style="width:32px;height:32px"></i></div>
+        <div class="stat-num" data-target="500"><span class="count">0</span><span class="stat-suffix">+</span></div>
+        <div class="stat-label">Students & Staff</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><i data-lucide="book-open" style="width:32px;height:32px"></i></div>
+        <div class="stat-num" data-target="50"><span class="count">0</span><span class="stat-suffix">+</span></div>
+        <div class="stat-label">Courses Managed</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><i data-lucide="file-stack" style="width:32px;height:32px"></i></div>
+        <div class="stat-num" data-target="200"><span class="count">0</span><span class="stat-suffix">+</span></div>
+        <div class="stat-label">Repository Items</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><i data-lucide="award" style="width:32px;height:32px"></i></div>
+        <div class="stat-num" data-target="100"><span class="count">0</span><span class="stat-suffix">%</span></div>
+        <div class="stat-label">Uptime Target</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="about">
+  <div class="cta-inner">
+    <div class="sec-label" style="justify-content:center;color:var(--gold)"><span>Get Started Today</span></div>
+    <h2>Ready to modernize<br/>SGES operations?</h2>
+    <p>Join the digital transformation of academic resource management at Sule Lamido University. Access the platform now using your institutional credentials.</p>
+    <div class="cta-btns">
+      <a href="app.html" class="btn btn-gold btn-xl">
+        <i data-lucide="log-in" style="width:18px;height:18px"></i>
+        Login to Platform
+      </a>
+      <a href="app.html#register" class="btn btn-xl cta-demo">
+        <i data-lucide="user-plus" style="width:18px;height:18px"></i>
+        Create Account
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="contact">
+  <div class="max-w">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-brand" style="margin-bottom:0">
+          <div class="nav-logo">S</div>
+          <div class="nav-name" style="font-size:16px">SGES HDRRC <span>Sule Lamido University</span></div>
+        </div>
+        <p>An enterprise system for managing human development resources, digital repositories, and courseware in the School of General and Entrepreneurial Studies, Sule Lamido University, Kafin Hausa.</p>
+        <div class="footer-social">
+          <a class="fs-btn"><i data-lucide="mail" style="width:16px;height:16px"></i></a>
+          <a class="fs-btn"><i data-lucide="phone" style="width:16px;height:16px"></i></a>
+          <a class="fs-btn"><i data-lucide="globe" style="width:16px;height:16px"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a href="#features">Features</a>
+        <a href="#roles">User Roles</a>
+        <a href="app.html">Dashboard</a>
+        <a href="app.html#register">Register</a>
+      </div>
+      <div class="footer-col">
+        <h4>Modules</h4>
+        <a href="#">HR Development</a>
+        <a href="#">Repository</a>
+        <a href="#">Courseware</a>
+        <a href="#">Announcements</a>
+      </div>
+      <div class="footer-col">
+        <h4>University</h4>
+        <a href="#">Sule Lamido University</a>
+        <a href="#">SGES Faculty</a>
+        <a href="#">Kafin Hausa, Jigawa</a>
+        <a href="#">Academic Calendar</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 SGES HDRRC · Sule Lamido University, Kafin Hausa. Built with Node.js, React & SQLite.</p>
+      <p>Designed for <a href="#">Nigerian Higher Education</a></p>
+    </div>
+  </div>
+</footer>
+
+<script>
+lucide.createIcons();
+
+// Carousel
+const track = document.getElementById('carouselTrack');
+const slides = track.querySelectorAll('.carousel-slide');
+const dotsEl = document.getElementById('ccDots');
+let cur = 0;
+const visible = () => window.innerWidth < 900 ? 1 : 3;
+
+slides.forEach((_,i) => {
+  const d = document.createElement('div');
+  d.className = 'cc-dot' + (i===0?' active':'');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(idx) {
+  const v = visible();
+  const max = slides.length - v;
+  cur = Math.max(0, Math.min(idx, max));
+  const w = slides[0].offsetWidth + 24;
+  track.style.transform = `translateX(-${cur * w}px)`;
+  dotsEl.querySelectorAll('.cc-dot').forEach((d,i)=>d.classList.toggle('active',i===cur));
+}
+document.getElementById('prevBtn').onclick = () => goTo(cur-1);
+document.getElementById('nextBtn').onclick = () => goTo(cur+1);
+let auto = setInterval(() => goTo(cur+1 > slides.length-visible() ? 0 : cur+1), 4000);
+track.addEventListener('mouseenter', ()=>clearInterval(auto));
+track.addEventListener('mouseleave', ()=>{ auto = setInterval(()=>goTo(cur+1>slides.length-visible()?0:cur+1),4000); });
+
+// Counter animation
+function animateCount(el, target) {
+  let n = 0;
+  const step = target / 60;
+  const t = setInterval(() => {
+    n = Math.min(n + step, target);
+    el.querySelector('.count').textContent = Math.floor(n);
+    if (n >= target) clearInterval(t);
+  }, 16);
+}
+
+// Intersection observer for fade-up and counters
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      if (e.target.classList.contains('stat-item')) {
+        const el = e.target.querySelector('[data-target]');
+        if (el && !el.dataset.animated) {
+          el.dataset.animated = true;
+          animateCount(el, parseInt(el.dataset.target));
+        }
+      }
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.fade-up, .stat-item').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
