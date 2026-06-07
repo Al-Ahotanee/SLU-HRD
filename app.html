@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SGES HDRRC — Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--ink:#0d1117;--ink2:#161d27;--ink3:#1e2937;--gold:#c9a84c;--gold2:#e8c96a;--gold-dim:rgba(201,168,76,0.12);--green:#1a6b4a;--green2:#2a8a62;--green-dim:rgba(26,107,74,0.12);--blue:#2563eb;--blue-dim:rgba(37,99,235,0.12);--purple:#7c3aed;--purple-dim:rgba(124,58,237,0.12);--red:#dc2626;--red-dim:rgba(220,38,38,0.1);--orange:#ea580c;--orange-dim:rgba(234,88,12,0.1);--sidebar-w:260px;--header-h:64px;--white:#ffffff;--surface:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--text:rgba(255,255,255,0.9);--muted:rgba(255,255,255,0.45);--muted2:rgba(255,255,255,0.25);--input-bg:rgba(255,255,255,0.06);--hover:rgba(255,255,255,0.05);--radius:12px;--shadow:0 8px 32px rgba(0,0,0,0.3)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);overflow:hidden}
+a{text-decoration:none;color:inherit}
+button,input,select,textarea{font-family:inherit}
+#authScreen{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:1000;background-image:radial-gradient(ellipse 60% 60% at 70% 40%,rgba(26,107,74,0.2),transparent),radial-gradient(ellipse 40% 40% at 20% 80%,rgba(201,168,76,0.1),transparent)}
+.auth-card{background:var(--ink2);border:1px solid var(--border);border-radius:20px;padding:48px 40px;width:100%;max-width:440px;box-shadow:var(--shadow);animation:fadeUp 0.5s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px}
+.auth-logo-sq{width:44px;height:44px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:900;color:var(--ink);font-size:20px}
+.auth-logo-text{font-size:18px;font-weight:700;line-height:1.2}
+.auth-logo-text span{display:block;color:var(--muted);font-size:12px;font-weight:400;letter-spacing:0.5px}
+.auth-tabs{display:flex;background:var(--surface);border-radius:8px;padding:4px;margin-bottom:28px;border:1px solid var(--border)}
+.auth-tab{flex:1;padding:9px;text-align:center;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;color:var(--muted);border:none;background:transparent}
+.auth-tab.active{background:var(--gold);color:var(--ink)}
+h3.auth-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;margin-bottom:6px}
+.auth-sub{color:var(--muted);font-size:14px;margin-bottom:28px}
+label{display:block;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;margin-top:16px}
+label:first-of-type{margin-top:0}
+input,select,textarea{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-size:14px;transition:border 0.2s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);background:rgba(201,168,76,0.06)}
+select option{background:var(--ink2)}
+textarea{resize:vertical;min-height:80px}
+.auth-btn{width:100%;margin-top:24px;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);font-size:15px;font-weight:700;border:none;border-radius:8px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.auth-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(201,168,76,0.4)}
+.auth-demo{margin-top:20px;border-top:1px solid var(--border);padding-top:16px}
+.demo-title{color:var(--muted);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.demo-btns{display:flex;gap:6px;flex-wrap:wrap}
+.demo-btn{flex:1;padding:7px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all 0.2s;min-width:80px;text-align:center}
+.demo-btn:hover{border-color:var(--gold);color:var(--gold)}
+.err-msg{background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.3);color:#f87171;padding:10px 14px;border-radius:8px;font-size:13px;margin-top:14px}
+#appShell{display:flex;height:100vh;display:none}
+.sidebar{width:var(--sidebar-w);background:var(--ink2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar-header{padding:20px 20px 0;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.sb-logo{width:38px;height:38px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:900;color:var(--ink);font-size:17px;flex-shrink:0}
+.sb-name{font-size:14px;font-weight:700;line-height:1.2}
+.sb-name span{display:block;color:var(--muted);font-size:10px;font-weight:400;letter-spacing:0.5px}
+.sidebar-section{padding:0 12px;margin-bottom:4px}
+.sidebar-section-label{color:var(--muted2);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:12px 8px 6px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:9px;cursor:pointer;transition:all 0.2s;color:var(--muted);font-size:14px;font-weight:500;position:relative;margin-bottom:2px}
+.nav-item:hover{background:var(--hover);color:var(--text)}
+.nav-item.active{background:var(--gold-dim);color:var(--gold)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--gold);border-radius:2px}
+.nav-badge{background:var(--red);color:var(--white);font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;margin-left:auto}
+.sidebar-footer{margin-top:auto;padding:16px 12px;border-top:1px solid var(--border)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:10px;border-radius:9px;cursor:pointer;transition:background 0.2s}
+.sb-user:hover{background:var(--hover)}
+.sb-avatar{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--green),var(--green2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.sb-user-info{flex:1;min-width:0}
+.sb-user-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user-role{color:var(--muted);font-size:11px;text-transform:capitalize}
+.main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:var(--header-h);background:var(--ink2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;flex-shrink:0}
+.topbar-title{font-size:18px;font-weight:700;flex:1}
+.topbar-title span{display:block;color:var(--muted);font-size:12px;font-weight:400;margin-top:1px}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.icon-btn{width:38px;height:38px;border-radius:8px;background:var(--surface);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all 0.2s}
+.icon-btn:hover{background:var(--hover);color:var(--text)}
+.tb-avatar{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--green),var(--green2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0}
+.page-content{flex:1;overflow-y:auto;padding:24px;display:none;height:100%}
+.page-content.active{display:block}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--ink3);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:all 0.2s}
+.stat-card:hover{border-color:rgba(255,255,255,0.15);transform:translateY(-2px)}
+.stat-card-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.stat-card-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:800;line-height:1;margin-bottom:4px}
+.stat-card-label{color:var(--muted);font-size:13px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:var(--ink3);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border)}
+.card-title{font-size:15px;font-weight:700}
+.card-body{padding:20px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(201,168,76,0.35)}
+.btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--hover)}
+.btn-green{background:var(--green);color:var(--white)}
+.btn-green:hover{background:var(--green2)}
+.btn-danger{background:var(--red-dim);color:#f87171;border:1px solid rgba(220,38,38,0.2)}
+.btn-danger:hover{background:rgba(220,38,38,0.2)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:6px}
+.btn-xs{padding:4px 10px;font-size:11px;border-radius:5px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{color:var(--muted);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:10px 14px;text-align:left;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border)}
+td{padding:13px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+tr:hover td{background:var(--hover)}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-gold{background:var(--gold-dim);color:var(--gold)}
+.badge-green{background:var(--green-dim);color:#4ade80}
+.badge-blue{background:var(--blue-dim);color:#60a5fa}
+.badge-red{background:var(--red-dim);color:#f87171}
+.badge-orange{background:var(--orange-dim);color:#fb923c}
+.badge-gray{background:rgba(255,255,255,0.07);color:var(--muted)}
+.badge-purple{background:var(--purple-dim);color:#c084fc}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap}
+.page-header-left h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:800}
+.page-header-left p{color:var(--muted);font-size:14px;margin-top:4px}
+.page-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search-bar{display:flex;align-items:center;gap:10px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:8px 14px;min-width:220px}
+.search-bar:focus-within{border-color:var(--gold)}
+.search-bar input{border:none;background:transparent;color:var(--text);font-size:13px;outline:none;width:100%;padding:0}
+.search-bar input::placeholder{color:var(--muted2)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--ink2);border:1px solid var(--border);border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:fadeUp 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.5)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--ink2);z-index:1}
+.modal-header h3{font-size:17px;font-weight:700}
+.modal-body{padding:24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.close-btn{width:32px;height:32px;border-radius:7px;background:var(--surface);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all 0.2s}
+.close-btn:hover{background:var(--hover);color:var(--text)}
+.form-group{margin-bottom:16px}
+.form-group label{margin-top:0;margin-bottom:6px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.announce-item{padding:16px;border-radius:10px;background:var(--surface);border:1px solid var(--border);margin-bottom:10px;transition:all 0.2s}
+.announce-item:hover{border-color:rgba(255,255,255,0.12)}
+.ai-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px}
+.ai-title{font-size:14px;font-weight:700}
+.ai-meta{color:var(--muted);font-size:12px;margin-top:4px}
+.ai-body{color:rgba(255,255,255,0.6);font-size:13px;line-height:1.6}
+.mat-item{display:flex;align-items:center;gap:14px;padding:14px;border-radius:10px;background:var(--surface);border:1px solid var(--border);margin-bottom:8px;transition:all 0.2s}
+.mat-item:hover{border-color:rgba(255,255,255,0.12)}
+.mat-icon{width:42px;height:42px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mat-info{flex:1;min-width:0}
+.mat-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mat-meta{color:var(--muted);font-size:12px;margin-top:2px}
+.mat-actions{display:flex;gap:6px;flex-shrink:0}
+.course-card{background:var(--ink3);border:1px solid var(--border);border-radius:12px;padding:20px;transition:all 0.3s;cursor:pointer}
+.course-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.2)}
+.cc-code{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.cc-title{font-size:15px;font-weight:700;margin-bottom:6px;line-height:1.3}
+.cc-meta{color:var(--muted);font-size:12px;margin-bottom:14px}
+.cc-footer{display:flex;align-items:center;justify-content:space-between}
+.cc-stats{display:flex;gap:12px}
+.cc-stat{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:12px}
+.repo-item{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.2s}
+.repo-item:hover{background:var(--hover)}
+.repo-item:last-child{border-bottom:none}
+.ri-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.ri-authors{color:var(--muted);font-size:12px;margin-bottom:8px}
+.ri-abstract{color:rgba(255,255,255,0.5);font-size:13px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ri-footer{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.dev-item{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.2s}
+.dev-item:hover{background:var(--hover)}
+.dev-item:last-child{border-bottom:none}
+.di-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.di-info{flex:1}
+.di-title{font-size:14px;font-weight:600;margin-bottom:2px}
+.di-meta{color:var(--muted);font-size:12px}
+.di-actions{display:flex;gap:6px;flex-shrink:0;align-items:center}
+.chart-wrap{position:relative;height:220px}
+#toast{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast-item{background:var(--ink2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);animation:slideIn 0.3s ease;max-width:320px}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.toast-success{border-color:rgba(26,107,74,0.5);color:#4ade80}
+.toast-error{border-color:rgba(220,38,38,0.5);color:#f87171}
+.empty-state{padding:60px 20px;text-align:center;color:var(--muted)}
+.empty-state p{font-size:14px;margin-top:12px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2)}
+.profile-box{background:var(--ink3);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.profile-avatar-lg{width:72px;height:72px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;flex-shrink:0}
+.profile-info h3{font-size:20px;font-weight:700;margin-bottom:4px}
+.profile-info p{color:var(--muted);font-size:14px}
+.profile-meta{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.pm-item{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tabs{display:flex;gap:2px;background:var(--surface);border-radius:9px;padding:3px;margin-bottom:20px;border:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+.tab-btn{padding:8px 16px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;color:var(--muted);border:none;background:transparent;white-space:nowrap}
+.tab-btn.active{background:var(--gold);color:var(--ink)}
+@media(max-width:900px){.stats-row{grid-template-columns:repeat(2,1fr)}.grid-2,.grid-3{grid-template-columns:1fr}.sidebar{position:fixed;left:-100%;z-index:300;height:100%;transition:left 0.3s}.sidebar.open{left:0}.form-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-sq">S</div>
+      <div class="auth-logo-text">SGES HDRRC <span>Sule Lamido University, Kafin Hausa</span></div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchTab('register')">Register</button>
+    </div>
+    <div id="loginForm">
+      <h3 class="auth-title">Welcome back</h3>
+      <p class="auth-sub">Enter your institutional credentials to continue.</p>
+      <label>Email Address</label>
+      <input type="email" id="loginEmail" placeholder="you@sges.edu.ng" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <div id="loginErr" style="display:none"></div>
+      <button class="auth-btn" onclick="doLogin()"><i data-lucide="log-in" style="width:16px;height:16px"></i>Sign In</button>
+      <div class="auth-demo">
+        <div class="demo-title">Quick Demo Access</div>
+        <div class="demo-btns">
+          <div class="demo-btn" onclick="fillDemo('admin@sges.edu.ng','Admin@1234')">👑 Admin</div>
+          <div class="demo-btn" onclick="fillDemo('amina.bello@sges.edu.ng','Lecturer@1234')">🎓 Lecturer</div>
+          <div class="demo-btn" onclick="fillDemo('ibrahim.musa@sges.edu.ng','Student@1234')">📚 Student</div>
+        </div>
+      </div>
+    </div>
+    <div id="registerForm" style="display:none">
+      <h3 class="auth-title">Create account</h3>
+      <p class="auth-sub">Register with your institutional details.</p>
+      <div class="form-row">
+        <div><label>Full Name</label><input type="text" id="regName" placeholder="Dr. Firstname Lastname"/></div>
+        <div><label>Role</label><select id="regRole"><option value="lecturer">Lecturer</option><option value="student">Student</option></select></div>
+      </div>
+      <label>Email Address</label>
+      <input type="email" id="regEmail" placeholder="you@sges.edu.ng"/>
+      <label>Department</label>
+      <input type="text" id="regDept" placeholder="e.g. Entrepreneurship"/>
+      <label>Password</label>
+      <input type="password" id="regPass" placeholder="Minimum 8 characters"/>
+      <div id="regErr" style="display:none"></div>
+      <button class="auth-btn" onclick="doRegister()"><i data-lucide="user-plus" style="width:16px;height:16px"></i>Create Account</button>
+    </div>
+  </div>
+</div>
+
+<div id="appShell">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sb-logo">S</div>
+      <div class="sb-name">SGES HDRRC <span>Platform v1.0</span></div>
+    </div>
+    <div id="sidebarNav" style="flex:1;overflow-y:auto;padding-bottom:8px"></div>
+    <div class="sidebar-footer">
+      <div class="sb-user" onclick="showPage('profile')">
+        <div class="sb-avatar" id="sbAvatar">--</div>
+        <div class="sb-user-info">
+          <div class="sb-user-name" id="sbName">User</div>
+          <div class="sb-user-role" id="sbRole">role</div>
+        </div>
+        <i data-lucide="chevron-right" style="width:14px;height:14px;color:var(--muted2);flex-shrink:0"></i>
+      </div>
+    </div>
+  </div>
+  <div class="main-area">
+    <div class="topbar">
+      <button class="icon-btn" onclick="toggleSidebar()"><i data-lucide="menu" style="width:18px;height:18px"></i></button>
+      <div class="topbar-title" id="topbarTitle">Dashboard <span id="topbarSub">Overview</span></div>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="refreshPage()"><i data-lucide="refresh-cw" style="width:16px;height:16px"></i></button>
+        <a href="index.html" class="icon-btn"><i data-lucide="home" style="width:16px;height:16px"></i></a>
+        <button class="icon-btn" onclick="doLogout()"><i data-lucide="log-out" style="width:16px;height:16px"></i></button>
+        <div class="tb-avatar" id="tbAvatar" onclick="showPage('profile')">--</div>
+      </div>
+    </div>
+    <div id="pagesContainer" style="flex:1;overflow:hidden;position:relative;display:flex;flex-direction:column"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <h3 id="modalTitle">Modal</h3>
+      <button class="close-btn" onclick="closeModal()"><i data-lucide="x" style="width:14px;height:14px"></i></button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ──
+const API = (window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1') ? 'http://localhost:3001' : '';
+let token = localStorage.getItem('sges_token');
+let user = null;
+try { const s=localStorage.getItem('sges_user'); if(s) user=JSON.parse(s); } catch(e){}
+
+// ── UTILS ──
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(API + path, opts);
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+function toast(msg, type='success') {
+  const el = document.createElement('div');
+  el.className = `toast-item toast-${type}`;
+  el.innerHTML = `<i data-lucide="${type==='success'?'check-circle':'alert-circle'}" style="width:16px;height:16px;flex-shrink:0"></i><span>${msg}</span>`;
+  document.getElementById('toast').appendChild(el);
+  lucide.createIcons();
+  setTimeout(() => el.remove(), 3500);
+}
+function fmt(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+function fmtTime(d) { if(!d) return '—'; const dt=new Date(d); return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+dt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function typeIcon(t) { return {note:'file-text',assignment:'clipboard-list',video:'play-square',slide:'presentation',quiz:'help-circle',other:'file'}[t]||'file'; }
+function typeColor(t) { return {note:'#60a5fa',assignment:'#fb923c',video:'#c084fc',slide:'#4ade80',quiz:'#fbbf24',other:'var(--muted)'}[t]||'var(--muted)'; }
+function typeBg(t) { return {note:'var(--blue-dim)',assignment:'var(--orange-dim)',video:'var(--purple-dim)',slide:'var(--green-dim)',quiz:'var(--gold-dim)',other:'rgba(255,255,255,0.05)'}[t]||'rgba(255,255,255,0.05)'; }
+function statusBadge(s) {
+  const m={completed:'badge-green',ongoing:'badge-blue',planned:'badge-gold',cancelled:'badge-red',active:'badge-green',inactive:'badge-gray'};
+  return `<span class="badge ${m[s]||'badge-gray'}">${s}</span>`;
+}
+function catBadge(c) {
+  const m={research:'badge-blue',thesis:'badge-purple',journal:'badge-green',conference:'badge-gold',manual:'badge-orange',other:'badge-gray'};
+  return `<span class="badge ${m[c]||'badge-gray'}">${c}</span>`;
+}
+
+// ── AUTH ──
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(tab==='login'?0:1)===i));
+  document.getElementById('loginForm').style.display = tab==='login'?'':'none';
+  document.getElementById('registerForm').style.display = tab==='register'?'':'none';
+}
+function fillDemo(email, pass) { document.getElementById('loginEmail').value=email; document.getElementById('loginPass').value=pass; }
+
+async function doLogin() {
+  const email=document.getElementById('loginEmail').value, pass=document.getElementById('loginPass').value;
+  const errEl=document.getElementById('loginErr'); errEl.style.display='none';
+  try {
+    const res = await api('POST','/api/auth/login',{email,password:pass});
+    token=res.token; user=res.user;
+    localStorage.setItem('sges_token',token); localStorage.setItem('sges_user',JSON.stringify(user));
+    initApp();
+  } catch(e) { errEl.className='err-msg'; errEl.textContent=e.message; errEl.style.display='block'; }
+}
+async function doRegister() {
+  const name=document.getElementById('regName').value, email=document.getElementById('regEmail').value,
+    pass=document.getElementById('regPass').value, role=document.getElementById('regRole').value, dept=document.getElementById('regDept').value;
+  const errEl=document.getElementById('regErr'); errEl.style.display='none';
+  try {
+    await api('POST','/api/auth/register',{name,email,password:pass,role,department:dept});
+    toast('Account created! Please sign in.'); switchTab('login'); document.getElementById('loginEmail').value=email;
+  } catch(e) { errEl.className='err-msg'; errEl.textContent=e.message; errEl.style.display='block'; }
+}
+function doLogout() {
+  token=null; user=null; localStorage.removeItem('sges_token'); localStorage.removeItem('sges_user');
+  document.getElementById('appShell').style.display='none'; document.getElementById('authScreen').style.display='flex';
+  lucide.createIcons();
+}
+
+// ── APP INIT ──
+function initApp() {
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('appShell').style.display='flex';
+  const init=user.avatar_initials||user.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('sbAvatar').textContent=init; document.getElementById('tbAvatar').textContent=init;
+  document.getElementById('sbName').textContent=user.name; document.getElementById('sbRole').textContent=user.role;
+  buildNav(); buildPages(); lucide.createIcons(); showPage('dashboard');
+}
+
+// ── NAV ──
+const NAV_CONFIG = {
+  admin:[
+    {section:'Main',items:[{id:'dashboard',icon:'layout-dashboard',label:'Dashboard'},{id:'announcements',icon:'megaphone',label:'Announcements'}]},
+    {section:'Academic',items:[{id:'courses',icon:'book-open',label:'Courses'},{id:'materials',icon:'file-stack',label:'Materials'},{id:'repository',icon:'archive',label:'Repository',badge:true}]},
+    {section:'People & Dev',items:[{id:'users',icon:'users',label:'User Management'},{id:'staffdev',icon:'trending-up',label:'Staff Development'}]},
+    {section:'Account',items:[{id:'profile',icon:'user-circle',label:'My Profile'}]},
+  ],
+  lecturer:[
+    {section:'Main',items:[{id:'dashboard',icon:'layout-dashboard',label:'Dashboard'},{id:'announcements',icon:'megaphone',label:'Announcements'}]},
+    {section:'Teaching',items:[{id:'courses',icon:'book-open',label:'My Courses'},{id:'materials',icon:'file-stack',label:'Course Materials'}]},
+    {section:'Research & Dev',items:[{id:'repository',icon:'archive',label:'Repository'},{id:'staffdev',icon:'trending-up',label:'My Development'}]},
+    {section:'Account',items:[{id:'profile',icon:'user-circle',label:'My Profile'}]},
+  ],
+  student:[
+    {section:'Main',items:[{id:'dashboard',icon:'layout-dashboard',label:'Dashboard'},{id:'announcements',icon:'megaphone',label:'Announcements'}]},
+    {section:'Learning',items:[{id:'courses',icon:'book-open',label:'My Courses'},{id:'allcourses',icon:'graduation-cap',label:'Browse Courses'},{id:'materials',icon:'file-stack',label:'Materials'}]},
+    {section:'Resources',items:[{id:'repository',icon:'archive',label:'Repository'}]},
+    {section:'Account',items:[{id:'profile',icon:'user-circle',label:'My Profile'}]},
+  ],
+};
+
+function buildNav() {
+  const nav=NAV_CONFIG[user.role]||NAV_CONFIG.student;
+  document.getElementById('sidebarNav').innerHTML = nav.map(sec=>`
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">${sec.section}</div>
+      ${sec.items.map(item=>`
+        <div class="nav-item" id="nav_${item.id}" onclick="showPage('${item.id}')">
+          <i data-lucide="${item.icon}" style="width:17px;height:17px;flex-shrink:0"></i>
+          <span>${item.label}</span>
+          ${item.badge?`<span class="nav-badge" id="pendingBadge" style="display:none">0</span>`:''}
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+  lucide.createIcons();
+}
+
+function buildPages() {
+  const ids=['dashboard','courses','allcourses','materials','repository','users','staffdev','announcements','profile','coursematerials'];
+  document.getElementById('pagesContainer').innerHTML = ids.map(id=>`<div class="page-content" id="page_${id}" style="overflow-y:auto"></div>`).join('');
+}
+
+const PAGE_TITLES = {
+  dashboard:['Dashboard','Overview & Analytics'], courses:['Courses','Course management'],
+  allcourses:['Browse Courses','Enroll in available courses'], materials:['Materials','Course resources'],
+  repository:['Repository','Academic archive'], users:['Users','User management'],
+  staffdev:['Staff Development','Training & professional development'],
+  announcements:['Announcements','Institutional notices'], profile:['Profile','Account settings'],
+  coursematerials:['Course Materials','Materials for selected course'],
+};
+
+async function showPage(pageId) {
+  document.querySelectorAll('.page-content').forEach(p=>p.classList.remove('active'));
+  const page=document.getElementById('page_'+pageId);
+  if (!page) return;
+  page.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const navEl=document.getElementById('nav_'+pageId); if(navEl) navEl.classList.add('active');
+  const [title,sub]=PAGE_TITLES[pageId]||[pageId,''];
+  document.getElementById('topbarTitle').innerHTML=`${title} <span>${sub}</span>`;
+  page.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;height:200px"><div class="spinner"></div></div>`;
+  try { await PAGES[pageId](page); lucide.createIcons(); }
+  catch(e) { page.innerHTML=`<div class="empty-state"><p style="color:#f87171">Error: ${esc(e.message)}</p></div>`; console.error(e); }
+}
+function refreshPage() { const a=document.querySelector('.page-content.active'); if(a) showPage(a.id.replace('page_','')); }
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+// ── MODAL ──
+function openModal(title, body, actions=[]) {
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=body;
+  const footer=document.getElementById('modalFooter');
+  footer.innerHTML=actions.map((a,i)=>`<button class="btn ${a.cls}" id="mact_${i}">${a.label}</button>`).join('');
+  actions.forEach((a,i)=>{
+    document.getElementById('mact_'+i).onclick = async () => {
+      if (a.action==='close') { closeModal(); return; }
+      const btn=document.getElementById('mact_'+i);
+      btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+      try { await a.action(); } catch(e) { toast(e.message,'error'); btn.disabled=false; btn.textContent=a.label; }
+    };
+  });
+  document.getElementById('modalOverlay').classList.add('open'); lucide.createIcons();
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+document.getElementById('modalOverlay').onclick = e => { if(e.target===document.getElementById('modalOverlay')) closeModal(); };
+
+// ════════════════════════════════════════════════════
+// PAGES
+// ════════════════════════════════════════════════════
+const PAGES = {};
+
+// ── DASHBOARD ──
+PAGES.dashboard = async (el) => {
+  if (user.role==='admin') {
+    const [stats, ann] = await Promise.all([api('GET','/api/stats'), api('GET','/api/announcements')]);
+    const pb=document.getElementById('pendingBadge');
+    if (pb && stats.pending_repo>0) { pb.textContent=stats.pending_repo; pb.style.display=''; }
+    el.innerHTML = `
+    <div class="stats-row">
+      ${[{n:stats.total_users,l:'Total Users',ic:'users',c:'var(--gold)',bg:'var(--gold-dim)'},
+         {n:stats.total_courses,l:'Courses',ic:'book-open',c:'var(--green2)',bg:'var(--green-dim)'},
+         {n:stats.total_materials,l:'Materials',ic:'file-stack',c:'#60a5fa',bg:'var(--blue-dim)'},
+         {n:stats.total_repo,l:'Repository Items',ic:'archive',c:'#c084fc',bg:'var(--purple-dim)'}].map(s=>`
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:${s.bg}"><i data-lucide="${s.ic}" style="color:${s.c};width:22px;height:22px"></i></div>
+          <div class="stat-card-num" style="color:${s.c}">${s.n}</div>
+          <div class="stat-card-label">${s.l}</div>
+        </div>`).join('')}
+    </div>
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Platform Overview</span><span class="badge badge-green">● Live</span></div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="ovChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">User Distribution</span></div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="udChart"></canvas></div></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Quick Stats</span></div>
+        <div class="card-body">
+          ${[{l:'Lecturers',v:stats.total_lecturers,ic:'graduation-cap',c:'var(--gold)'},
+             {l:'Students',v:stats.total_students,ic:'users',c:'var(--green2)'},
+             {l:'Total Enrollments',v:stats.enrollments,ic:'link',c:'#60a5fa'},
+             {l:'Pending Repo Approvals',v:stats.pending_repo,ic:'clock',c:stats.pending_repo>0?'#f87171':'var(--muted)'},
+             {l:'Staff Dev Activities',v:stats.total_staff_dev,ic:'trending-up',c:'#c084fc'}].map(r=>`
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+              <div style="width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <i data-lucide="${r.ic}" style="color:${r.c};width:16px;height:16px"></i>
+              </div>
+              <span style="flex:1;color:var(--muted);font-size:13px">${r.l}</span>
+              <span style="font-size:20px;font-weight:700;color:${r.c}">${r.v}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Recent Announcements</span><button class="btn btn-primary btn-sm" onclick="showPage('announcements')">View All</button></div>
+        <div class="card-body">
+          ${ann.slice(0,4).map(a=>`
+            <div class="announce-item" style="padding:12px;margin-bottom:8px">
+              <div class="ai-title" style="font-size:13px">${esc(a.title)}</div>
+              <div class="ai-meta">${fmtTime(a.created_at)}</div>
+            </div>`).join('')||'<div class="empty-state" style="padding:20px"><p>No announcements</p></div>'}
+        </div>
+      </div>
+    </div>`;
+    lucide.createIcons();
+    new Chart(document.getElementById('ovChart'),{type:'bar',data:{labels:['Users','Courses','Materials','Repo','Dev','Enrollments'],datasets:[{data:[stats.total_users,stats.total_courses,stats.total_materials,stats.total_repo,stats.total_staff_dev,stats.enrollments],backgroundColor:['rgba(201,168,76,0.7)','rgba(26,107,74,0.7)','rgba(37,99,235,0.7)','rgba(124,58,237,0.7)','rgba(234,88,12,0.7)','rgba(96,165,250,0.7)'],borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'rgba(255,255,255,0.4)',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'rgba(255,255,255,0.4)'},beginAtZero:true}}}});
+    new Chart(document.getElementById('udChart'),{type:'doughnut',data:{labels:['Admin','Lecturers','Students'],datasets:[{data:[1,stats.total_lecturers,stats.total_students],backgroundColor:['rgba(201,168,76,0.8)','rgba(26,107,74,0.8)','rgba(37,99,235,0.8)'],borderColor:'transparent',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'rgba(255,255,255,0.6)',padding:14,font:{size:12}}}}}});
+  }
+  else if (user.role==='lecturer') {
+    const [courses,materials,repo,dev,ann] = await Promise.all([api('GET','/api/courses'),api('GET','/api/materials'),api('GET','/api/repository'),api('GET','/api/staff-development'),api('GET','/api/announcements')]);
+    el.innerHTML=`
+    <div class="stats-row">
+      ${[{n:courses.length,l:'My Courses',ic:'book-open',c:'var(--gold)',bg:'var(--gold-dim)'},
+         {n:materials.length,l:'Materials Uploaded',ic:'file-stack',c:'#60a5fa',bg:'var(--blue-dim)'},
+         {n:repo.length,l:'Repository Items',ic:'archive',c:'#c084fc',bg:'var(--purple-dim)'},
+         {n:dev.filter(d=>d.status==='completed').length,l:'Dev Completed',ic:'check-circle',c:'var(--green2)',bg:'var(--green-dim)'}].map(s=>`
+        <div class="stat-card"><div class="stat-card-icon" style="background:${s.bg}"><i data-lucide="${s.ic}" style="color:${s.c};width:22px;height:22px"></i></div><div class="stat-card-num" style="color:${s.c}">${s.n}</div><div class="stat-card-label">${s.l}</div></div>`).join('')}
+    </div>
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-header"><span class="card-title">My Courses</span><button class="btn btn-primary btn-sm" onclick="showPage('courses')">Manage</button></div>
+        <div class="card-body" style="padding:0">
+          ${courses.slice(0,5).map(c=>`
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer" onclick="openCourseMaterials(${c.id},'${esc(c.title)}')">
+              <div style="width:36px;height:36px;background:var(--gold-dim);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="book-open" style="color:var(--gold);width:17px;height:17px"></i></div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:600">${esc(c.title)}</div><div style="color:var(--muted);font-size:11px">${esc(c.code)} · ${c.enrollment_count||0} students</div></div>
+              <span class="badge badge-gold">${c.material_count||0} files</span>
+            </div>`).join('')||'<div class="empty-state" style="padding:30px"><p>No courses yet</p></div>'}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Development Activities</span><button class="btn btn-primary btn-sm" onclick="showPage('staffdev')">View All</button></div>
+        <div class="card-body" style="padding:0">
+          ${dev.slice(0,5).map(d=>`
+            <div class="dev-item">
+              <div class="di-dot" style="background:${d.status==='completed'?'var(--green2)':d.status==='ongoing'?'#60a5fa':'var(--gold)'}"></div>
+              <div class="di-info"><div class="di-title" style="font-size:13px">${esc(d.title)}</div><div class="di-meta">${d.type} · ${fmt(d.start_date)}</div></div>
+              ${statusBadge(d.status)}
+            </div>`).join('')||'<div class="empty-state" style="padding:30px"><p>No activities</p></div>'}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Announcements</span></div>
+      <div class="card-body">
+        ${ann.slice(0,3).map(a=>`<div class="announce-item"><div class="ai-header"><div><div class="ai-title">${esc(a.title)}</div><div class="ai-meta">${fmtTime(a.created_at)}</div></div></div><div class="ai-body">${esc(a.body)}</div></div>`).join('')||'<div class="empty-state" style="padding:20px"><p>No announcements</p></div>'}
+      </div>
+    </div>`;
+    lucide.createIcons();
+  }
+  else {
+    const [courses,allCourses,repo,ann] = await Promise.all([api('GET','/api/courses'),api('GET','/api/courses/all'),api('GET','/api/repository'),api('GET','/api/announcements')]);
+    el.innerHTML=`
+    <div class="stats-row">
+      ${[{n:courses.length,l:'Enrolled Courses',ic:'book-open',c:'var(--gold)',bg:'var(--gold-dim)'},
+         {n:courses.reduce((a,c)=>a+(c.material_count||0),0),l:'Available Materials',ic:'file-stack',c:'#60a5fa',bg:'var(--blue-dim)'},
+         {n:repo.length,l:'Repository Items',ic:'archive',c:'#c084fc',bg:'var(--purple-dim)'},
+         {n:allCourses.length,l:'Total Courses',ic:'graduation-cap',c:'var(--green2)',bg:'var(--green-dim)'}].map(s=>`
+        <div class="stat-card"><div class="stat-card-icon" style="background:${s.bg}"><i data-lucide="${s.ic}" style="color:${s.c};width:22px;height:22px"></i></div><div class="stat-card-num" style="color:${s.c}">${s.n}</div><div class="stat-card-label">${s.l}</div></div>`).join('')}
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><span class="card-title">My Enrolled Courses</span><button class="btn btn-primary btn-sm" onclick="showPage('allcourses')">Browse More</button></div>
+        <div class="card-body" style="padding:0">
+          ${courses.slice(0,6).map(c=>`
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer" onclick="openCourseMaterials(${c.id},'${esc(c.title)}')">
+              <div style="width:36px;height:36px;background:var(--green-dim);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="book-open" style="color:var(--green2);width:17px;height:17px"></i></div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:600">${esc(c.title)}</div><div style="color:var(--muted);font-size:11px">${esc(c.code)} · ${esc(c.lecturer_name||'—')}</div></div>
+              <span class="badge badge-blue">${c.material_count||0} files</span>
+            </div>`).join('')||`<div class="empty-state" style="padding:30px"><p>Not enrolled yet. <a href="#" onclick="showPage('allcourses')" style="color:var(--gold)">Browse courses</a></p></div>`}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Announcements</span></div>
+        <div class="card-body">
+          ${ann.slice(0,4).map(a=>`<div class="announce-item" style="padding:12px;margin-bottom:8px"><div class="ai-title" style="font-size:13px">${esc(a.title)}</div><div class="ai-meta">${fmtTime(a.created_at)}</div><div class="ai-body" style="font-size:12px;margin-top:4px;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden">${esc(a.body)}</div></div>`).join('')||'<div class="empty-state" style="padding:20px"><p>No announcements</p></div>'}
+        </div>
+      </div>
+    </div>`;
+    lucide.createIcons();
+  }
+};
+
+// ── COURSES ──
+PAGES.courses = async (el) => {
+  const courses=await api('GET','/api/courses');
+  let lecs=[];
+  if (user.role==='admin') lecs=await api('GET','/api/lecturers');
+  window._courses=courses; window._lecs=lecs;
+  el.innerHTML=`
+  <div class="page-header">
+    <div class="page-header-left"><h2>Courses</h2><p>${courses.length} course${courses.length!==1?'s':''}</p></div>
+    <div class="page-actions">
+      <div class="search-bar"><i data-lucide="search" style="width:15px;height:15px;color:var(--muted2);flex-shrink:0"></i><input type="text" placeholder="Search courses..." oninput="filterCourses(this.value)"/></div>
+      ${user.role!=='student'?`<button class="btn btn-primary" onclick="openAddCourse()"><i data-lucide="plus" style="width:15px;height:15px"></i>Add Course</button>`:''}
+    </div>
+  </div>
+  <div id="coursesGrid" class="grid-3">${renderCourseCards(courses)}</div>`;
+  lucide.createIcons();
+};
+
+function renderCourseCards(arr) {
+  if (!arr.length) return `<div class="empty-state" style="grid-column:1/-1"><i data-lucide="book-x" style="width:40px;height:40px"></i><p>No courses found</p></div>`;
+  return arr.map(c=>`
+    <div class="course-card" onclick="openCourseMaterials(${c.id},'${esc(c.title)}')">
+      <div class="cc-code">${esc(c.code)}</div>
+      <div class="cc-title">${esc(c.title)}</div>
+      <div class="cc-meta">${esc(c.lecturer_name||user.name)} · Level ${c.level} · ${c.semester} Sem</div>
+      <div class="cc-footer">
+        <div class="cc-stats">
+          <div class="cc-stat"><i data-lucide="users" style="width:12px;height:12px"></i>${c.enrollment_count||0}</div>
+          <div class="cc-stat"><i data-lucide="file" style="width:12px;height:12px"></i>${c.material_count||0}</div>
+          <div class="cc-stat"><i data-lucide="credit-card" style="width:12px;height:12px"></i>${c.credit_units}u</div>
+        </div>
+        ${user.role!=='student'?`<div style="display:flex;gap:4px" onclick="event.stopPropagation()">
+          <button class="btn btn-xs btn-secondary" onclick="openEditCourse(${c.id})"><i data-lucide="edit-2" style="width:11px;height:11px"></i></button>
+          <button class="btn btn-xs btn-danger" onclick="deleteCourse(${c.id})"><i data-lucide="trash-2" style="width:11px;height:11px"></i></button>
+        </div>`:`<span class="badge badge-green" style="font-size:10px">Enrolled</span>`}
+      </div>
+    </div>`).join('');
+}
+
+function filterCourses(q) {
+  const f=(window._courses||[]).filter(c=>c.title.toLowerCase().includes(q.toLowerCase())||c.code.toLowerCase().includes(q.toLowerCase()));
+  document.getElementById('coursesGrid').innerHTML=renderCourseCards(f); lucide.createIcons();
+}
+
+function openAddCourse() {
+  const lecOpts=(window._lecs||[]).map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
+  openModal('Add New Course',`
+    <div class="form-row"><div class="form-group"><label>Course Title</label><input type="text" id="m_title" placeholder="Introduction to Entrepreneurship"/></div><div class="form-group"><label>Course Code</label><input type="text" id="m_code" placeholder="ENT101"/></div></div>
+    <div class="form-group"><label>Description</label><textarea id="m_desc" placeholder="Course description..."></textarea></div>
+    <div class="form-row"><div class="form-group"><label>Level</label><select id="m_level"><option>100</option><option>200</option><option>300</option><option>400</option></select></div><div class="form-group"><label>Semester</label><select id="m_sem"><option>1st</option><option>2nd</option></select></div></div>
+    <div class="form-row"><div class="form-group"><label>Credit Units</label><input type="number" id="m_cu" value="3" min="1" max="6"/></div>${user.role==='admin'?`<div class="form-group"><label>Lecturer</label><select id="m_lid"><option value="">—Select—</option>${lecOpts}</select></div>`:''}</div>
+  `,[
+    {label:'Cancel',cls:'btn-secondary',action:'close'},
+    {label:'Create Course',cls:'btn-primary',action:async()=>{
+      const body={title:document.getElementById('m_title').value,code:document.getElementById('m_code').value,description:document.getElementById('m_desc').value,level:document.getElementById('m_level').value,semester:document.getElementById('m_sem').value,credit_units:parseInt(document.getElementById('m_cu').value)||3};
+      if(user.role==='admin'){const le=document.getElementById('m_lid');if(le)body.lecturer_id=le.value||null;}
+      await api('POST','/api/courses',body); toast('Course created'); closeModal(); showPage('courses');
+    }},
+  ]);
+}
+
+function openEditCourse(id) {
+  const c=(window._courses||[]).find(x=>x.id===id); if(!c) return;
+  openModal('Edit Course',`
+    <div class="form-group"><label>Title</label><input type="text" id="m_title" value="${esc(c.title)}"/></div>
+    <div class="form-group"><label>Description</label><textarea id="m_desc">${esc(c.description||'')}</textarea></div>
+    <div class="form-row"><div class="form-group"><label>Level</label><select id="m_level"><option ${c.level==='100'?'selected':''}>100</option><option ${c.level==='200'?'selected':''}>200</option><option ${c.level==='300'?'selected':''}>300</option><option ${c.level==='400'?'selected':''}>400</option></select></div><div class="form-group"><label>Status</label><select id="m_status"><option value="active" ${c.status==='active'?'selected':''}>Active</option><option value="inactive" ${c.status==='inactive'?'selected':''}>Inactive</option></select></div></div>
+  `,[
+    {label:'Cancel',cls:'btn-secondary',action:'close'},
+    {label:'Save',cls:'btn-primary',action:async()=>{await api('PUT',`/api/courses/${id}`,{title:document.getElementById('m_title').value,description:document.getElementById('m_desc').value,level:document.getElementById('m_level').value,status:document.getElementById('m_status').value});toast('Updated');closeModal();showPage('courses');}},
+  ]);
+}
+async function deleteCourse(id) { if(!confirm('Delete this course and all its materials?'))return; await api('DELETE',`/api/courses/${id}`); toast('Deleted'); showPage('courses'); }
+
+// ── ALL COURSES (student) ──
+PAGES.allcourses = async (el) => {
+  const [all,enrolled] = await Promise.all([api('GET','/api/courses/all'),api('GET','/api/courses')]);
+  const enrolledIds=new Set(enrolled.map(c=>c.id));
+  window._allCourses=all; window._enrolledIds=enrolledIds;
+  el.innerHTML=`
+  <div class="page-header">
+    <div class="page-header-left"><h2>Browse Courses</h2><p>Enroll in available courses</p></div>
+    <div class="search-bar"><i data-lucide="search" style="width:15px;height:15px;color:var(--muted2);flex-shrink:0"></i><input type="text" placeholder="Search courses..." oninput="filterAllCourses(this.value)"/></div>
+  </div>
+  <div id="allGrid" class="grid-3">${renderAllCourseCards(all,enrolledIds)}</div>`;
+  lucide.createIcons();
+};
+function renderAllCourseCards(arr,eids) {
+  return arr.map(c=>`
+    <div class="course-card">
+      <div class="cc-code">${esc(c.code)}</div>
+      <div class="cc-title">${esc(c.title)}</div>
+      <div class="cc-meta">${esc(c.lecturer_name||'—')} · Level ${c.level} · ${c.credit_units} units</div>
+      <div class="cc-footer">
+        <div class="cc-stats"><div class="cc-stat"><i data-lucide="file" style="width:12px;height:12px"></i>${c.material_count||0}</div></div>
+        ${(eids||window._enrolledIds||new Set()).has(c.id)?`<span class="badge badge-green"><i data-lucide="check" style="width:10px;height:10px"></i>Enrolled</span>`:`<button class="btn btn-xs btn-primary" onclick="event.stopPropagation();enrollCourse(${c.id})"><i data-lucide="plus" style="width:11px;height:11px"></i>Enroll</button>`}
+      </div>
+    </div>`).join('')||'<div class="empty-state" style="grid-column:1/-1"><p>No courses available</p></div>';
+}
+function filterAllCourses(q) {
+  const f=(window._allCourses||[]).filter(c=>c.title.toLowerCase().includes(q.toLowerCase())||c.code.toLowerCase().includes(q.toLowerCase()));
+  document.getElementById('allGrid').innerHTML=renderAllCourseCards(f,window._enrolledIds); lucide.createIcons();
+}
+async function enrollCourse(id) { try{await api('POST',`/api/courses/${id}/enroll`);toast('Enrolled!');showPage('allcourses');}catch(e){toast(e.message,'error');} }
+
+// ── COURSE MATERIALS ──
+PAGES.coursematerials = async (el) => {
+  if(!window._activeCourse) return showPage('courses');
+  const {courseId,courseTitle}=window._activeCourse;
+  const mats=await api('GET',`/api/courses/${courseId}/materials`);
+  document.getElementById('topbarTitle').innerHTML=`Materials <span>${esc(courseTitle)}</span>`;
+  el.innerHTML=`
+  <div class="page-header">
+    <div class="page-header-left"><h2>${esc(courseTitle)}</h2><p>${mats.length} material${mats.length!==1?'s':''}</p></div>
+    <div class="page-actions">
+      <button class="btn btn-secondary" onclick="showPage('courses')"><i data-lucide="arrow-left" style="width:15px;height:15px"></i>Back</button>
+      ${user.role!=='student'?`<button class="btn btn-primary" onclick="openAddMaterial(${courseId})"><i data-lucide="upload" style="width:15px;height:15px"></i>Upload</button>`:''}
+    </div>
+  </div>
+  <div class="card"><div class="card-body" style="padding:8px">
+    ${mats.map(m=>`
+      <div class="mat-item">
+        <div class="mat-icon" style="background:${typeBg(m.type)}"><i data-lucide="${typeIcon(m.type)}" style="color:${typeColor(m.type)};width:20px;height:20px"></i></div>
+        <div class="mat-info">
+          <div class="mat-name">${esc(m.title)}</div>
+          <div class="mat-meta">${m.type} · ${fmtTime(m.created_at)} · ${esc(m.uploader_name||'—')} · ${m.downloads||0} downloads</div>
+        </div>
+        <div class="mat-actions">
+          ${m.content?`<button class="btn btn-xs btn-secondary" onclick="viewMaterial('${esc(m.title)}',\`${m.content.replace(/`/g,'\\`')}\`)"><i data-lucide="eye" style="width:11px;height:11px"></i>View</button>`:''}
+          ${user.role!=='student'?`<button class="btn btn-xs btn-danger" onclick="deleteMaterial(${m.id},'coursematerials')"><i data-lucide="trash-2" style="width:11px;height:11px"></i></button>`:''}
+        </div>
+      </div>`).join('')||'<div class="empty-state" style="padding:40px"><i data-lucide="inbox" style="width:40px;height:40px"></i><p>No materials uploaded yet</p></div>'}
+  </div></div>`;
+  lucide.createIcons();
+};
+function openCourseMaterials(id,title) { window._activeCourse={courseId:id,courseTitle:title}; showPage('coursematerials'); }
+function viewMaterial(title,content) {
+  openModal(title,`<div style="background:var(--input-bg);border-radius:8px;padding:16px;font-size:13px;line-height:1.7;color:rgba(255,255,255,0.75);white-space:pre-wrap;max-height:400px;overflow-y:auto">${esc(content)}</div>`,[{label:'Close',cls:'btn-secondary',action:'close'}]);
+}
+
+// ── MATERIALS (all) ──
+PAGES.materials = async (el) => {
+  const mats=await api('GET','/api/materials');
+  window._mats=mats;
+  el.innerHTML=`
+  <div class="page-header">
+    <div class="page-header-left"><h2>All Materials</h2><p>${mats.length} items</p></div>
+    <div class="search-bar"><i data-lucide="search" style="width:15px;height:15px;color:var(--muted2);flex-shrink:0"></i><input type="text" placeholder="Search materials..." oninput="filterMats(this.value)"/></div>
+  </div>
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>Title</th><th>Type</th><th>Course</th><th>Uploaded By</th><th>Date</th>${user.role!=='student'?'<th></th>':''}</tr></thead>
+    <tbody id="matBody">${renderMatRows(mats)}</tbody>
+  </table></div></div>`;
+  lucide.createIcons();
+};
+function renderMatRows(arr) {
+  if(!arr.length) return `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No materials found</td></tr>`;
+  return arr.map(m=>`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;background:${typeBg(m.type)};border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="${typeIcon(m.type)}" style="color:${typeColor(m.type)};width:14px;height:14px"></i></div><div><div style="font-weight:600;font-size:13px">${esc(m.title)}</div><div style="color:var(--muted);font-size:11px">${esc(m.description||'')}</div></div></div></td>
+      <td><span class="badge ${m.type==='note'?'badge-blue':m.type==='assignment'?'badge-orange':m.type==='video'?'badge-purple':'badge-gold'}">${m.type}</span></td>
+      <td style="color:var(--muted);font-size:12px"><div style="font-weight:600">${esc(m.course_code||'—')}</div><div style="color:rgba(255,255,255,0.3);font-size:11px">${esc(m.course_title||'')}</div></td>
+      <td style="font-size:12px">${esc(m.uploader_name||'—')}</td>
+      <td style="color:var(--muted);font-size:12px">${fmtTime(m.created_at)}</td>
+      ${user.role!=='student'?`<td><button class="btn btn-xs btn-danger" onclick="deleteMaterial(${m.id},'materials')"><i data-lucide="trash-2" style="width:11px;height:11px"></i></button></td>`:''}
+    </tr>`).join('');
+}
+function filterMats(q) { const f=(window._mats||[]).filter(m=>m.title.toLowerCase().includes(q.toLowerCase())||(m.course_code||'').toLowerCase().includes(q.toLowerCase())); document.getElementById('matBody').innerHTML=renderMatRows(f); lucide.createIcons(); }
+
+function openAddMaterial(courseId) {
+  openModal('Upload Material',`
+    <div class="form-group"><label>Title</label><input type="text" id="m_title" placeholder="Material title"/></div>
+    <div class="form-group"><label>Description</label><input type="text" id="m_desc" placeholder="Brief description"/></div>
+    <div class="form-row"><div class="form-group"><label>Type</label><select id="m_type"><option value="note">Lecture Note</option><option value="assignment">Assignment</option><option value="slide">Slide</option><option value="video">Video Link</option><option value="quiz">Quiz</option><option value="other">Other</option></select></div><div class="form-group"><label>File Name</label><input type="text" id="m_fname" placeholder="document.pdf"/></div></div>
+    <div class="form-group"><label>Content / Text</label><textarea id="m_content" placeholder="Paste content, instructions, or notes here..." style="min-height:120px"></textarea></div>
+  `,[
+    {label:'Cancel',cls:'btn-secondary',action:'close'},
+    {label:'Upload',cls:'btn-primary',action:async()=>{await api('POST','/api/materials',{title:document.getElementById('m_title').value,description:document.getElementById('m_desc').value,type:document.getElementById('m_type').value,file_name:document.getElementById('m_fname').value,content:document.getElementById('m_content').value,course_id:courseId});toast('Uploaded');closeModal();showPage('coursematerials');}},
+  ]);
+}
+async function deleteMaterial(id, returnPage) { if(!confirm('Delete this material?'))return; await api('DELETE',`/api/materials/${id}`); toast('Deleted'); showPage(returnPage||'materials'); }
+
+// ── REPOSITORY ──
+PAGES.repository = async (el) => {
+  const items=await api('GET','/api/repository');
+  const pending=items.filter(r=>!r.approved);
+  window._repoItems=items;
+  el.innerHTML=`
+  <div class="page-header">
+    <div class="page-header-left"><h2>Digital Repository</h2><p>${items.length} item${items.length!==1?'s':''}</p></div>
+    <div class="page-actions">
+      <div class="search-bar"><i data-lucide="search" style="width:15px;height:15px;color:var(--muted2);flex-shrink:0"></i><input type="text" placeholder="Search repository..." oninput="filterRepo(this.value)"/></div>
+      <button class="btn btn-primary" onclick="openAddRepo()"><i data-lucide="plus" style="width:15px;height:15px"></i>Submit Item</button>
+    </div>
+  </div>
+  ${user.role==='admin'&&pending.length?`<div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px"><i data-lucide="clock" style="color:var(--gold);width:18px;height:18px;flex-shrink:0"></i><span style="font-size:13px;flex:1">${pending.length} submission${pending.length>1?'s':''} awaiting approval</span><button class="btn btn-primary btn-sm" onclick="filterRepoTab('pending',document.querySelector('[data-rtab=pending]'))">Review</button></div>`:''}
+  <div class="tabs">
+    <button class="tab-btn active" data-rtab="all" onclick="filterRepoTab('all',this)">All (${items.length})</button>
+    <button class="tab-btn" data-rtab="approved" onclick="filterRepoTab('approved',this)">Approved (${items.filter(r=>r.approved).length})</button>
+    ${user.role==='admin'?`<button class="tab-btn" data-rtab="pending" onclick="filterRepoTab('pending',this)">Pending (${pending.length})</button>`:''}
+    <button class="tab-btn" data-rtab="research" onclick="filterRepoTab('research',this)">Research</button>
+    <button class="tab-btn" data-rtab="thesis" onclick="filterRepoTab('thesis',this)">Thesis</button>
+    <button class="tab-btn" data-rtab="journal" onclick="filterRepoTab('journal',this)">Journal</button>
+  </div>
+  <div class="card"><div id="repoList">${renderRepoItems(items)}</div></div>`;
+  lucide.createIcons();
+};
+function renderRepoItems(arr) {
+  if(!arr.length) return `<div class="empty-state" style="padding:60px"><i data-lucide="archive-x" style="width:40px;height:40px"></i><p>No items found</p></div>`;
+  return arr.map(r=>`
+    <div class="repo-item">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <div style="flex:1">
+          <div class="ri-title">${esc(r.title)}</div>
+          <div class="ri-authors">${esc(r.authors||'—')} · ${r.year||'—'}</div>
+          <div class="ri-abstract">${esc(r.abstract||'No abstract provided.')}</div>
+          <div class="ri-footer">
+            ${catBadge(r.category)}
+            ${r.approved?`<span class="badge badge-green"><i data-lucide="check" style="width:10px;height:10px"></i>Approved</span>`:`<span class="badge badge-orange"><i data-lucide="clock" style="width:10px;height:10px"></i>Pending</span>`}
+            ${(r.keywords||'').split(',').slice(0,3).map(k=>`<span class="badge badge-gray">${esc(k.trim())}</span>`).join('')}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          ${user.role==='admin'&&!r.approved?`<button class="btn btn-xs btn-green" onclick="approveRepo(${r.id})"><i data-lucide="check" style="width:11px;height:11px"></i>Approve</button>`:''}
+          ${user.role!=='student'?`<button class="btn btn-xs btn-danger" onclick="deleteRepo(${r.id})"><i data-lucide="trash-2" style="width:11px;height:11px"></i></button>`:''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+function filterRepoTab(tab,btn) {
+  document.querySelectorAll('[data-rtab]').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active');
+  let f=window._repoItems||[];
+  if(tab==='approved') f=f.filter(r=>r.approved); else if(tab==='pending') f=f.filter(r=>!r.approved); else if(tab!=='all') f=f.filter(r=>r.category===tab);
+  document.getElementById('repoList').innerHTML=renderRepoItems(f); lucide.createIcons();
+}
+function filterRepo(q) { const f=(window._repoItems||[]).filter(r=>r.title.toLowerCase().includes(q.toLowerCase())||(r.authors||'').toLowerCase().includes(q.toLowerCase())||(r.keywords||'').toLowerCase().includes(q.toLowerCase())); document.getElementById('repoList').innerHTML=renderRepoItems(f); lucide.createIcons(); }
+function openAddRepo() {
+  openModal('Submit to Repository',`
+    <div class="form-group"><label>Title</label><input type="text" id="m_title" placeholder="Full title of the work"/></div>
+    <div class="form-row"><div class="form-group"><label>Authors</label><input type="text" id="m_authors" placeholder="Surname, F., Surname, F."/></div><div class="form-group"><label>Year</label><input type="number" id="m_year" value="${new Date().getFullYear()}"/></div></div>
+    <div class="form-group"><label>Category</label><select id="m_cat"><option value="research">Research Paper</option><option value="thesis">Thesis/Dissertation</option><option value="journal">Journal Article</option><option value="conference">Conference Paper</option><option value="manual">Manual/Report</option><option value="other">Other</option></select></div>
+    <div class="form-group"><label>Abstract</label><textarea id="m_abstract" placeholder="Brief abstract..." style="min-height:100px"></textarea></div>
+    <div class="form-group"><label>Keywords (comma-separated)</label><input type="text" id="m_kw" placeholder="education, ICT, Nigeria"/></div>
+    <div class="form-group"><label>File Name (optional)</label><input type="text" id="m_fname" placeholder="paper.pdf"/></div>
+  `,[
+    {label:'Cancel',cls:'btn-secondary',action:'close'},
+    {label:'Submit',cls:'btn-primary',action:async()=>{await api('POST','/api/repository',{title:document.getElementById('m_title').value,authors:document.getElementById('m_authors').value,year:parseInt(document.getElementById('m_year').value),category:document.getElementById('m_cat').value,abstract:document.getElementById('m_abstract').value,keywords:document.getElementById('m_kw').value,file_name:document.getElementById('m_fname').value});toast('Submitted for approval');closeModal();showPage('repository');}},
+  ]);
+}
+async function approveRepo(id) { await api('POST',`/api/repository/${id}/approve`); toast('Approved!'); showPage('repository'); }
+async function deleteRepo(id) { if(!confirm('Delete this repository item?'))return; await api('DELETE',`/api/repository/${id}`); toast('Deleted'); showPage('repository'); }
+
+// ── USERS ──
+PAGES.users = async (el) => {
+  const users=await api('GET','/api/users');
+  window._users=users;
+  el.innerHTML=`
+  <div class="page-header">
+    <div class="page-header-left"><h2>User Management</h2><p>${users.length} registered users</p></div>
+    <div class="page-actions">
+      <div class="search-bar"><i data-lucide="search" style="width:15px;height:15px;color:var(--muted2);flex-shrink:0"></i><input type="text" placeholder="Search users..." oninput="filterUsers(this.value)"/></div>
+      <button class="btn btn-primary" onclick="openAddUser()"><i data-lucide="user-plus" style="width:15px;height:15px"></i>Add User</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="filterUserRole('all',this)">All (${users.length})</button>
+    <button class="tab-btn" onclick="filterUserRole('admin',this)">Admins (${users.filter(u=>u.role==='admin').length})</button>
+    <button class="tab-btn" onclick="filterUserRole('lecturer',this)">Lecturers (${users.filter(u=>u.role==='lecturer').length})</button>
+    <button class="tab-btn" onclick="filterUserRole('student',this)">Students (${users.filter(u=>u.role==='student').length})</button>
+  </div>
+  <div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Department</th><th>Joined</th><th></th></tr></thead>
+    <tbody id="usersBody">${renderUserRows(users)}</tbody>
+  </table></div></div>`;
+  lucide.createIcons();
+};
+function renderUserRows(arr) {
+  if(!arr.length) return `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No users found</td></tr>`;
+  return arr.map(u=>`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:10px"><div style="width:34px;height:34px;border-radius:8px;background:${u.role==='admin'?'var(--gold-dim)':u.role==='lecturer'?'var(--green-dim)':'var(--blue-dim)'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:${u.role==='admin'?'var(--gold)':u.role==='lecturer'?'var(--green2)':'#60a5fa'}">${(u.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase())}</div><div style="font-weight:600;font-size:13px">${esc(u.name)}</div></div></td>
+      <td style="color:var(--muted);font-size:13px">${esc(u.email)}</td>
+      <td><span class="badge ${u.role==='admin'?'badge-gold':u.role==='lecturer'?'badge-green':'badge-blue'}">${u.role}</span></td>
+      <td style="color:var(--muted);font-size:13px">${esc(u.department||'—')}</td>
+      <td style="color:var(--muted);font-size:12px">${fmt(u.created_at)}</td>
+      <td><button class="btn btn-xs btn-danger" onclick="deleteUser(${u.id},'${esc(u.name)}')"><i data-lucide="trash-2" style="width:11px;height:11px"></i></button></td>
+    </tr>`).join('');
+}
+function filterUsers(q) { const f=(window._users||[]).filter(u=>u.name.toLowerCase().includes(q.toLowerCase())||u.email.toLowerCase().includes(q.toLowerCase())); document.getElementById('usersBody').innerHTML=renderUserRows(f); lucide.createIcons(); }
+function filterUserRole(role,btn) { document.querySelectorAll('.tabs .tab-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); const f=role==='all'?window._users:(window._users||[]).filter(u=>u.role===role); document.getElementById('usersBody').innerHTML=renderUserRows(f); lucide.createIcons(); }
+function openAddUser() {
+  openModal('Add New User',`
+    <div class="form-row"><div class="form-group"><label>Full Name</label><input type="text" id="m_name" placeholder="Dr. Firstname Lastname"/></div><div class="form-group"><label>Role</label><select id="m_role"><option value="lecturer">Lecturer</option><option value="student">Student</option><option value="admin">Admin</option></select></div></div>
+    <div class="form-group"><label>Email Address</label><input type="email" id="m_email" placeholder="user@sges.edu.ng"/></div>
+    <div class="form-row"><div class="form-group"><label>Department</label><input type="text" id="m_dept" placeholder="e.g. Entrepreneurship"/></div><div class="form-group"><label>Phone</label><input type="text" id="m_phone" placeholder="+234 000 000 0000"/></div></div>
+    <div class="form-group"><label>Password</label><input type="password" id="m_pass" placeholder="Minimum 8 characters"/></div>
+  `,[
+    {label:'Cancel',cls:'btn-secondary',action:'close'},
+    {label:'Create User',cls:'btn-primary',action:async()=>{await api('POST','/api/users',{name:document.getElementById('m_name').value,email:document.getElementById('m_email').value,role:document.getElementById('m_role').value,department:document.getElementById('m_dept').value,phone:document.getElementById('m_phone').value,password:document.getElementById('m_pass').value});toast('User created');closeModal();showPage('users');}},
+  ]);
+}
+async function deleteUser(id,name) { if(!confirm(`Delete user "${name}"?`))return; try{await api('DELETE',`/api/users/${id}`);toast('User deleted');showPage('users');}catch(e){toast(e.message,'error');} }
+
+// ── STAFF DEVELOPMENT ──
+PAGES.staffdev = async (el) => {
+  const items=await api('GET','/api/staff-development');
+  let lecs=[];
+  if(user.role==='admin') lecs=await api('GET','/api/lecturers');
+  window._devItems=items; window._devLecs=lecs;
+  el.innerHTML=`
+  <div class="page-header">
+    <div class="page-header-left"><h2>Staff Development</h2><p>${items.length} activit${items.length!==1?'ies':'y'}</p></div>
+    <div class="page-actions">
+      <div class="search-bar"><i data-lucide="search" style="width:15px;height:15px;color:var(--muted2);flex-shrink:0"></i><input type="text" placeholder="Search..." oninput="filterDev(this.value)"/></div>
+      <button class="btn btn-primary" onclick="openAddDev()"><i data-lucide="plus" style="width:15px;height:15px"></i>Log Activity</button>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-bottom:16px">
+    <div class="card"><div class="card-header"><span class="card-title">Status Overview</span></div><div class="card-body"><div class="chart-wrap"><canvas id="devChart"></canvas></div></div></div>
+    <div class="card"><div class="card-header"><span class="card-title">By Type</span></div><div class="card-body"><div class="chart-wrap"><canvas id="devTypeChart"></canvas></div></div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="filterDevStatus('all',this)">All (${items.length})</button>
+    <button class="tab-btn" onclick="filterDevStatus('planned',this)">Planned (${items.filter(d=>d.status==='planned').length})</button>
+    <button class="tab-btn" onclick="filterDevStatus('ongoing',this)">Ongoing (${items.filter(d=>d.status==='ongoing').length})</button>
+    <button class="tab-btn" onclick="filterDevStatus('completed',this)">Completed (${items.filter(d=>d.status==='completed').length})</button>
+  </div>
+  <div class="card"><div id="devList" style="padding:0">${renderDevItems(items)}</div></div>`;
+  lucide.createIcons();
+  const sc=['planned','ongoing','completed','cancelled'].map(s=>items.filter(d=>d.status===s).length);
+  new Chart(document.getElementById('devChart'),{type:'bar',data:{labels:['Planned','Ongoing','Completed','Cancelled'],datasets:[{data:sc,backgroundColor:['rgba(201,168,76,0.7)','rgba(37,99,235,0.7)','rgba(26,107,74,0.7)','rgba(220,38,38,0.7)'],borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'rgba(255,255,255,0.4)'}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'rgba(255,255,255,0.4)'},beginAtZero:true}}}});
+  const types=[...new Set(items.map(d=>d.type||'other'))];
+  new Chart(document.getElementById('devTypeChart'),{type:'doughnut',data:{labels:types,datasets:[{data:types.map(t=>items.filter(d=>d.type===t).length),backgroundColor:['rgba(201,168,76,0.8)','rgba(26,107,74,0.8)','rgba(37,99,235,0.8)','rgba(234,88,12,0.8)','rgba(168,85,247,0.8)','rgba(220,38,38,0.8)'],borderColor:'transparent',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'rgba(255,255,255,0.6)',padding:12,font:{size:11}}}}}});
+};
+function renderDevItems(arr) {
+  if(!arr.length) return `<div class="empty-state" style="padding:60px"><i data-lucide="trending-up" style="width:40px;height:40px"></i><p>No activities logged</p></div>`;
+  return arr.map(d=>`
+    <div class="dev-item">
+      <div class="di-dot" style="background:${d.status==='completed'?'var(--green2)':d.status==='ongoing'?'#60a5fa':d.status==='cancelled'?'var(--red)':'var(--gold)'}"></div>
+      <div class="di-info">
+        <div class="di-title">${esc(d.title)}</div>
+        <div class="di-meta">${d.type||'training'} · ${esc(d.organizer||'—')} · ${fmt(d.start_date)}${d.end_date&&d.end_date!==d.start_date?' → '+fmt(d.end_date):''}${d.staff_name&&user.role==='admin'?' · '+esc(d.staff_name):''}</div>
+        ${d.notes?`<div style="color:rgba(255,255,255,0.3);font-size:12px;margin-top:2px">${esc(d.notes)}</div>`:''}
+      </div>
+      <div class="di-actions">
+        ${statusBadge(d.status)}
+        <button class="btn btn-xs btn-secondary" onclick='openEditDev(${JSON.stringify(d).replace(/'/g,"&#39;")})' ><i data-lucide="edit-2" style="width:11px;height:11px"></i></button>
+        <button class="btn btn-xs btn-danger" onclick="deleteDev(${d.id})"><i data-lucide="trash-2" style="width:11px;height:11px"></i></button>
+      </div>
+    </div>`).join('');
+}
+function filterDevStatus(s,btn) { document.querySelectorAll('.tabs .tab-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); const f=s==='all'?window._devItems:(window._devItems||[]).filter(d=>d.status===s); document.getElementById('devList').innerHTML=renderDevItems(f); lucide.createIcons(); }
+function filterDev(q) { const f=(window._devItems||[]).filter(d=>d.title.toLowerCase().includes(q.toLowerCase())||(d.organizer||'').toLowerCase().includes(q.toLowerCase())); document.getElementById('devList').innerHTML=renderDevItems(f); lucide.createIcons(); }
+function openAddDev() {
+  const lecOpts=(window._devLecs||[]).map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
+  openModal('Log Development Activity',`
+    <div class="form-group"><label>Activity Title</label><input type="text" id="m_title" placeholder="Workshop / Training name"/></div>
+    <div class="form-row"><div class="form-group"><label>Type</label><select id="m_type"><option value="training">Training</option><option value="workshop">Workshop</option><option value="seminar">Seminar</option><option value="conference">Conference</option><option value="certification">Certification</option><option value="other">Other</option></select></div><div class="form-group"><label>Status</label><select id="m_status"><option value="planned">Planned</option><option value="ongoing">Ongoing</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div></div>
+    <div class="form-group"><label>Organizer</label><input type="text" id="m_org" placeholder="NUC, Google, TETFUND..."/></div>
+    <div class="form-row"><div class="form-group"><label>Start Date</label><input type="date" id="m_sd"/></div><div class="form-group"><label>End Date</label><input type="date" id="m_ed"/></div></div>
+    ${user.role==='admin'&&lecOpts?`<div class="form-group"><label>Staff Member</label><select id="m_uid"><option value="">—Assign to—</option>${lecOpts}</select></div>`:''}
+    <div class="form-group"><label>Notes</label><textarea id="m_notes" placeholder="Additional notes..."></textarea></div>
+  `,[
+    {label:'Cancel',cls:'btn-secondary',action:'close'},
+    {label:'Log Activity',cls:'btn-primary',action:async()=>{
+      const body={title:document.getElementById('m_title').value,type:document.getElementById('m_type').value,status:document.getElementById('m_status').value,organizer:document.getElementById('m_org').value,start_date:document.getElementById('m_sd').value,end_date:document.getElementById('m_ed').value,notes:document.getElementById('m_notes').value};
+      if(user.role==='admin'){const ue=document.getElementById('m_uid');if(ue)body.user_id=ue.value||null;}
+      await api('POST','/api/staff-development',body); toast('Activity logged'); closeModal(); showPage('staffdev');
+    }},
+  ]);
+}
+function openEditDev(d) {
+  if (typeof d==='string') try{d=JSON.parse(d);}catch(e){return;}
+  openModal('Edit Activity',`
+    <div class="form-group"><label>Title</label><input type="text" id="m_title" value="${esc(d.title)}"/></div>
+    <div class="form-row"><div class="form-group"><label>Type</label><select id="m_type"><option value="training" ${d.type==='training'?'selected':''}>Training</option><option value="workshop" ${d.type==='workshop'?'selected':''}>Workshop</option><option value="seminar" ${d.type==='seminar'?'selected':''}>Seminar</option><option value="conference" ${d.type==='conference'?'selected':''}>Conference</option><option value="certification" ${d.type==='certification'?'selected':''}>Certification</option><option value="other" ${d.type==='other'?'selected':''}>Other</option></select></div><div class="form-group"><label>Status</label><select id="m_status"><option value="planned" ${d.status==='planned'?'selected':''}>Planned</option><option value="ongoing" ${d.status==='ongoing'?'selected':''}>Ongoing</option><option value="completed" ${d.status==='completed'?'selected':''}>Completed</option><option value="cancelled" ${d.status==='cancelled'?'selected':''}>Cancelled</option></select></div></div>
+    <div class="form-group"><label>Organizer</label><input type="text" id="m_org" value="${esc(d.organizer||'')}"/></div>
+    <div class="form-row"><div class="form-group"><label>Start Date</label><input type="date" id="m_sd" value="${d.start_date||''}"/></div><div class="form-group"><label>End Date</label><input type="date" id="m_ed" value="${d.end_date||''}"/></div></div>
+    <div class="form-group"><label>Notes</label><textarea id="m_notes">${esc(d.notes||'')}</textarea></div>
+  `,[
+    {label:'Cancel',cls:'btn-secondary',action:'close'},
+    {label:'Save',cls:'btn-primary',action:async()=>{await api('PUT',`/api/staff-development/${d.id}`,{title:document.getElementById('m_title').value,type:document.getElementById('m_type').value,status:document.getElementById('m_status').value,organizer:document.getElementById('m_org').value,start_date:document.getElementById('m_sd').value,end_date:document.getElementById('m_ed').value,notes:document.getElementById('m_notes').value});toast('Updated');closeModal();showPage('staffdev');}},
+  ]);
+}
+async function deleteDev(id) { if(!confirm('Delete this activity?'))return; await api('DELETE',`/api/staff-development/${id}`); toast('Deleted'); showPage('staffdev'); }
+
+// ── ANNOUNCEMENTS ──
+PAGES.announcements = async (el) => {
+  const items=await api('GET','/api/announcements');
+  el.innerHTML=`
+  <div class="page-header">
+    <div class="page-header-left"><h2>Announcements</h2><p>${items.length} notice${items.length!==1?'s':''}</p></div>
+    ${user.role!=='student'?`<button class="btn btn-primary" onclick="openAddAnnouncement()"><i data-lucide="megaphone" style="width:15px;height:15px"></i>New Announcement</button>`:''}
+  </div>
+  <div id="annList">
+    ${items.map(a=>`
+      <div class="announce-item">
+        <div class="ai-header">
+          <div>
+            <div class="ai-title">${esc(a.title)}</div>
+            <div class="ai-meta">${fmtTime(a.created_at)} · by ${esc(a.poster_name||'Admin')} · <span class="badge ${a.target_role==='all'?'badge-gray':a.target_role==='student'?'badge-blue':'badge-green'}" style="font-size:10px">${a.target_role==='all'?'Everyone':a.target_role}</span></div>
+          </div>
+          ${user.role==='admin'?`<button class="btn btn-xs btn-danger" onclick="deleteAnnouncement(${a.id})"><i data-lucide="trash-2" style="width:11px;height:11px"></i></button>`:''}
+        </div>
+        <div class="ai-body">${esc(a.body)}</div>
+      </div>`).join('')||'<div class="empty-state" style="padding:60px"><i data-lucide="megaphone" style="width:40px;height:40px"></i><p>No announcements yet</p></div>'}
+  </div>`;
+  lucide.createIcons();
+};
+function openAddAnnouncement() {
+  openModal('New Announcement',`
+    <div class="form-group"><label>Title</label><input type="text" id="m_title" placeholder="Announcement subject"/></div>
+    <div class="form-group"><label>Target Audience</label><select id="m_target"><option value="all">Everyone</option><option value="lecturer">Lecturers Only</option><option value="student">Students Only</option></select></div>
+    <div class="form-group"><label>Message</label><textarea id="m_body" placeholder="Write your announcement here..." style="min-height:120px"></textarea></div>
+  `,[
+    {label:'Cancel',cls:'btn-secondary',action:'close'},
+    {label:'Publish',cls:'btn-primary',action:async()=>{await api('POST','/api/announcements',{title:document.getElementById('m_title').value,body:document.getElementById('m_body').value,target_role:document.getElementById('m_target').value});toast('Published');closeModal();showPage('announcements');}},
+  ]);
+}
+async function deleteAnnouncement(id) { if(!confirm('Delete this announcement?'))return; await api('DELETE',`/api/announcements/${id}`); toast('Deleted'); showPage('announcements'); }
+
+// ── PROFILE ──
+PAGES.profile = async (el) => {
+  const me=await api('GET','/api/auth/me');
+  const init=me.avatar_initials||me.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  el.innerHTML=`
+  <div style="max-width:640px">
+    <div class="profile-box">
+      <div class="profile-avatar-lg" style="background:${me.role==='admin'?'linear-gradient(135deg,#c9a84c,#e8c96a)':me.role==='lecturer'?'linear-gradient(135deg,#1a6b4a,#2a8a62)':'linear-gradient(135deg,#2563eb,#3b82f6)'}">${init}</div>
+      <div class="profile-info">
+        <h3>${esc(me.name)}</h3><p>${esc(me.email)}</p>
+        <div class="profile-meta">
+          <div class="pm-item"><i data-lucide="briefcase" style="width:14px;height:14px"></i>${esc(me.department||'No department')}</div>
+          <div class="pm-item"><i data-lucide="shield" style="width:14px;height:14px"></i><span class="badge ${me.role==='admin'?'badge-gold':me.role==='lecturer'?'badge-green':'badge-blue'}">${me.role}</span></div>
+          <div class="pm-item"><i data-lucide="calendar" style="width:14px;height:14px"></i>Joined ${fmt(me.created_at)}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Edit Profile</span></div>
+      <div class="card-body">
+        <div class="form-group"><label>Full Name</label><input type="text" id="p_name" value="${esc(me.name)}"/></div>
+        <div class="form-row"><div class="form-group"><label>Department</label><input type="text" id="p_dept" value="${esc(me.department||'')}"/></div><div class="form-group"><label>Phone</label><input type="text" id="p_phone" value="${esc(me.phone||'')}"/></div></div>
+        <div class="form-group"><label>Bio</label><textarea id="p_bio" placeholder="Brief professional bio...">${esc(me.bio||'')}</textarea></div>
+        <div style="margin-top:8px"><button class="btn btn-primary" onclick="saveProfile(${me.id})"><i data-lucide="save" style="width:15px;height:15px"></i>Save Changes</button></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-header"><span class="card-title">Session</span></div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">
+          <div><div style="font-size:14px;font-weight:600">Sign out of platform</div><div style="color:var(--muted);font-size:12px;margin-top:2px">Ends your current session</div></div>
+          <button class="btn btn-danger btn-sm" onclick="doLogout()"><i data-lucide="log-out" style="width:13px;height:13px"></i>Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  lucide.createIcons();
+};
+async function saveProfile(id) {
+  await api('PUT',`/api/users/${id}`,{name:document.getElementById('p_name').value,department:document.getElementById('p_dept').value,phone:document.getElementById('p_phone').value,bio:document.getElementById('p_bio').value});
+  user.name=document.getElementById('p_name').value; localStorage.setItem('sges_user',JSON.stringify(user));
+  document.getElementById('sbName').textContent=user.name; toast('Profile updated');
+}
+
+// ── BOOTSTRAP ──
+if (window.location.hash==='#register') switchTab('register');
+if (token && user) { initApp(); } else { document.getElementById('authScreen').style.display='flex'; lucide.createIcons(); }
+</script>
+</body>
+</html>
