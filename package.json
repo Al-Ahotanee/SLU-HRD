@@ -1,0 +1,16 @@
+{
+  "name": "sges-hdrrc",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node api/index.js",
+    "dev": "nodemon api/index.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^9.6.0",
+    "cors": "^2.8.6",
+    "express": "^4.22.2",
+    "jsonwebtoken": "^9.0.3",
+    "sql.js": "^1.14.1"
+  }
+}
