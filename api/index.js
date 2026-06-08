@@ -6,7 +6,8 @@ const db = require('./db');
 const app = express();
 const SECRET = process.env.JWT_SECRET || 'sges-slu-kafin-hausa-2024-secret';
 
-app.use(cors({ origin: '*' }));
+app.use(cors({ origin: '*', methods: ['GET','POST','PUT','DELETE','OPTIONS'], allowedHeaders: ['Content-Type','Authorization'] }));
+app.options('*', cors());
 app.use(express.json({ limit: '10mb' }));
 
 function auth(req, res, next) {
@@ -136,7 +137,7 @@ app.get('/api/staff-development', auth, (req, res) => {
   res.json(db.getStaffDev(uid));
 });
 app.post('/api/staff-development', auth, staffOnly, (req, res) => {
-  const data = { ...req.body, user_id: req.user.role==='admin'&&req.body.user_id ? req.body.user_id : req.user.id };
+  const data = { ...req.body, user_id: req.user.role === 'admin' && req.body.user_id ? req.body.user_id : req.user.id };
   const id = db.createStaffDev(data);
   res.json({ success: true, id });
 });
@@ -156,10 +157,13 @@ app.delete('/api/announcements/:id', auth, adminOnly, (req, res) => { db.deleteA
 
 // STATS & MISC
 app.get('/api/stats', auth, adminOnly, (req, res) => res.json(db.getStats()));
-app.get('/api/lecturers', auth, (req, res) => res.json(db.getAllUsers('lecturer').map(u=>({id:u.id,name:u.name,department:u.department}))));
+app.get('/api/lecturers', auth, (req, res) => res.json(db.getAllUsers('lecturer').map(u => ({ id: u.id, name: u.name, department: u.department }))));
 app.get('/api/health', (req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));
 
+// Vercel requires module.exports for serverless
 module.exports = app;
+
+// Local dev
 if (require.main === module) {
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, () => console.log(`SGES API on :${PORT}`));
