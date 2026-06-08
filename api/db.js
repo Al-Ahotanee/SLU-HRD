@@ -1,4 +1,5 @@
-const initSqlJs = require('sql.js');
+// Use asm.js build — no WebAssembly required, works in all serverless environments
+const initSqlJs = require('sql.js/dist/sql-asm.js');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
 const path = require('path');
