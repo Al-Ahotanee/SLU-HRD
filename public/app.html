@@ -297,7 +297,16 @@ async function api(method, path, body) {
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(API + path, opts);
   const data = await r.json();
-  if (!r.ok) throw new Error(data.error || 'Request failed');
+  if (!r.ok) {
+    if (r.status === 401 && path !== '/api/auth/login') {
+      // Token missing/expired/invalid — don't leave a half-logged-in dashboard
+      // shell showing stale data with errors scattered across it. Force a
+      // clean return to the login screen instead.
+      doLogout();
+      toast(data.error || 'Session expired, please log in again', 'error');
+    }
+    throw new Error(data.error || 'Request failed');
+  }
   return data;
 }
 function toast(msg, type='success') {
@@ -1062,7 +1071,23 @@ async function saveProfile(id) {
 
 // ── BOOTSTRAP ──
 if (window.location.hash==='#register') switchTab('register');
-if (token && user) { initApp(); } else { document.getElementById('authScreen').style.display='flex'; lucide.createIcons(); }
+(async function boot() {
+  if (token && user) {
+    try {
+      // Verify the cached token with the server before trusting it — this is
+      // what used to be skipped, so the dashboard shell would render from
+      // stale localStorage data and only then fail with "Invalid token" once
+      // it tried to load real data.
+      const fresh = await api('GET','/api/auth/me');
+      user = fresh; localStorage.setItem('sges_user', JSON.stringify(user));
+      initApp();
+    } catch (e) {
+      document.getElementById('authScreen').style.display='flex'; lucide.createIcons();
+    }
+  } else {
+    document.getElementById('authScreen').style.display='flex'; lucide.createIcons();
+  }
+})();
 </script>
 </body>
 </html>
