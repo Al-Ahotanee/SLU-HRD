@@ -90,6 +90,8 @@ async function initDb() {
       type TEXT NOT NULL,
       file_name TEXT DEFAULT '',
       file_size INTEGER DEFAULT 0,
+      file_url TEXT DEFAULT '',
+      file_type TEXT DEFAULT '',
       content TEXT DEFAULT '',
       course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE,
       uploaded_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
@@ -103,6 +105,8 @@ async function initDb() {
       authors TEXT DEFAULT '',
       category TEXT NOT NULL,
       file_name TEXT DEFAULT '',
+      file_url TEXT DEFAULT '',
+      file_type TEXT DEFAULT '',
       keywords TEXT DEFAULT '',
       year INTEGER,
       approved INTEGER DEFAULT 0,
@@ -140,6 +144,16 @@ async function initDb() {
       entity_id INTEGER,
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
+  `);
+
+  // Defensive: if this database was created by an earlier version of this
+  // app (before file_url/file_type existed), add the columns now. Safe to
+  // run on every cold start — IF NOT EXISTS makes it a no-op once applied.
+  await query(`
+    ALTER TABLE materials ADD COLUMN IF NOT EXISTS file_url TEXT DEFAULT '';
+    ALTER TABLE materials ADD COLUMN IF NOT EXISTS file_type TEXT DEFAULT '';
+    ALTER TABLE repository ADD COLUMN IF NOT EXISTS file_url TEXT DEFAULT '';
+    ALTER TABLE repository ADD COLUMN IF NOT EXISTS file_type TEXT DEFAULT '';
   `);
 
   const admin = await get('SELECT id FROM users WHERE email=$1', ['admin@sges.edu.ng']);
@@ -272,8 +286,8 @@ db.deleteCourse = (id) => run('DELETE FROM courses WHERE id=$1', [id]);
 db.getMaterialsByCourse = (cid) => all(`SELECT m.*,u.name as uploader_name FROM materials m LEFT JOIN users u ON m.uploaded_by=u.id WHERE m.course_id=$1 ORDER BY m.created_at DESC`, [cid]);
 db.getAllMaterials = () => all(`SELECT m.*,u.name as uploader_name,c.title as course_title,c.code as course_code FROM materials m LEFT JOIN users u ON m.uploaded_by=u.id LEFT JOIN courses c ON m.course_id=c.id ORDER BY m.created_at DESC`, []);
 db.createMaterial = async (data) => {
-  const r = await run('INSERT INTO materials (title,description,type,file_name,file_size,content,course_id,uploaded_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id',
-    [data.title, data.description || '', data.type, data.file_name || '', data.file_size || 0, data.content || '', data.course_id, data.uploaded_by]);
+  const r = await run('INSERT INTO materials (title,description,type,file_name,file_size,file_url,file_type,content,course_id,uploaded_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id',
+    [data.title, data.description || '', data.type, data.file_name || '', data.file_size || 0, data.file_url || '', data.file_type || '', data.content || '', data.course_id, data.uploaded_by]);
   return r.lastInsertRowid;
 };
 db.deleteMaterial = (id) => run('DELETE FROM materials WHERE id=$1', [id]);
@@ -284,8 +298,8 @@ db.getRepository = (approved) => {
   return all(`SELECT r.*,u.name as submitter_name FROM repository r LEFT JOIN users u ON r.submitted_by=u.id WHERE r.approved=$1 ORDER BY r.created_at DESC`, [approved ? 1 : 0]);
 };
 db.createRepoEntry = async (data) => {
-  const r = await run('INSERT INTO repository (title,abstract,authors,category,file_name,keywords,year,submitted_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id',
-    [data.title, data.abstract || '', data.authors || '', data.category, data.file_name || '', data.keywords || '', data.year || new Date().getFullYear(), data.submitted_by]);
+  const r = await run('INSERT INTO repository (title,abstract,authors,category,file_name,file_url,file_type,keywords,year,submitted_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id',
+    [data.title, data.abstract || '', data.authors || '', data.category, data.file_name || '', data.file_url || '', data.file_type || '', data.keywords || '', data.year || new Date().getFullYear(), data.submitted_by]);
   return r.lastInsertRowid;
 };
 db.approveRepo = (id, by) => run('UPDATE repository SET approved=1,approved_by=$1 WHERE id=$2', [by, id]);

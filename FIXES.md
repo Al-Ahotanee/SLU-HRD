@@ -44,19 +44,37 @@
    matches what you've used on your other projects. Create a project and
    copy the connection string it gives you (it looks like
    `postgresql://user:password@host/dbname?sslmode=require`).
-2. **In your Vercel project → Settings → Environment Variables**, add:
+2. **Create a Vercel Blob store** (for file uploads — course materials and
+   repository submissions). In your Vercel project → **Storage** tab →
+   **Create Database** → **Blob**. Connect it to this project; Vercel adds
+   the `BLOB_READ_WRITE_TOKEN` environment variable for you automatically.
+3. **In your Vercel project → Settings → Environment Variables**, add:
    - `DATABASE_URL` = the Neon connection string from step 1
    - `JWT_SECRET` = any long random string (e.g. generate one with
      `openssl rand -hex 32`)
-   Add both to **all three** environments (Production, Preview,
+   (`BLOB_READ_WRITE_TOKEN` is already added by step 2.)
+   Add all of these to **all three** environments (Production, Preview,
    Development) with the *same* values — a mismatched `JWT_SECRET` between
    environments is what causes "valid" tokens to fail verification when you
    hit a different deployment URL.
-3. **Redeploy.** On first request, the app will automatically create its
+4. **Redeploy.** On first request, the app will automatically create its
    tables and seed the 3 demo accounts (admin / lecturer / student) — same
    as before, just in real Postgres now.
-4. For local development, copy `.env.example` to `.env` and fill in the
-   same two values, then `node api/index.js` (or `npm run dev`).
+5. For local development, copy `.env.example` to `.env`, fill in the same
+   values (pull `BLOB_READ_WRITE_TOKEN` from Vercel with `vercel env pull`
+   or copy it from the dashboard), then `node api/index.js` (or
+   `npm run dev`).
+
+## File uploads (new)
+
+Course materials and repository submissions can now attach a real file
+(PDF, Word, PowerPoint, Excel, image, or text — up to 50MB). The browser
+uploads the file directly to Vercel Blob storage (not through this app's
+serverless function), so it isn't limited by the small request-body size
+Vercel imposes on functions. The server only ever issues a short-lived,
+scoped upload token via `POST /api/upload`. Once uploaded, the file's URL,
+name, size, and type are saved on the material/repository row, and a
+"Download" button appears wherever that item is listed.
 
 ## Why this fixes every symptom you described
 

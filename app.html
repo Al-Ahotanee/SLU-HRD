@@ -309,6 +309,38 @@ async function api(method, path, body) {
   }
   return data;
 }
+
+// Uploads a File straight from the browser to Vercel Blob storage (bypassing
+// this app's own server for the actual bytes, so large PDFs/Word docs don't
+// hit any request-size limit). Only a short-lived upload token is fetched
+// from our /api/upload route. Returns the fields to merge into the
+// materials/repository payload. `statusElId` is an optional element id to
+// show "Uploading… NN%" progress text into while it runs.
+async function uploadToBlob(file, folder, statusElId) {
+  const statusEl = statusElId ? document.getElementById(statusElId) : null;
+  const MAX_BYTES = 50 * 1024 * 1024;
+  if (file.size > MAX_BYTES) {
+    toast(`"${file.name}" is over the 50MB upload limit`, 'error');
+    throw new Error('File too large');
+  }
+  if (statusEl) statusEl.textContent = `Uploading ${file.name}…`;
+  try {
+    const { upload } = await import('https://esm.sh/@vercel/blob@2.5.0/client');
+    const blob = await upload(`${folder}/${Date.now()}-${file.name}`, file, {
+      access: 'public',
+      handleUploadUrl: API + '/api/upload',
+      headers: { Authorization: 'Bearer ' + token },
+      contentType: file.type,
+      onUploadProgress: (p) => { if (statusEl) statusEl.textContent = `Uploading ${file.name}… ${Math.round(p.percentage)}%`; },
+    });
+    if (statusEl) statusEl.textContent = `Uploaded ${file.name}`;
+    return { file_url: blob.url, file_name: file.name, file_size: file.size, file_type: file.type || blob.contentType };
+  } catch (e) {
+    if (statusEl) statusEl.textContent = '';
+    toast(`File upload failed: ${e.message}`, 'error');
+    throw e;
+  }
+}
 function toast(msg, type='success') {
   const el = document.createElement('div');
   el.className = `toast-item toast-${type}`;
@@ -733,12 +765,21 @@ PAGES.coursematerials = async (el) => {
         </div>
         <div class="mat-actions">
           ${m.content?`<button class="btn btn-xs btn-secondary" onclick="viewMaterial('${esc(m.title)}',\`${m.content.replace(/`/g,'\\`')}\`)"><i data-lucide="eye" style="width:11px;height:11px"></i>View</button>`:''}
+          ${m.file_url?`<button class="btn btn-xs btn-secondary" onclick="downloadFile('${esc(m.file_url)}',${m.id},'material')"><i data-lucide="download" style="width:11px;height:11px"></i>${esc(m.file_name||'File')}</button>`:''}
           ${user.role!=='student'?`<button class="btn btn-xs btn-danger" onclick="deleteMaterial(${m.id},'coursematerials')"><i data-lucide="trash-2" style="width:11px;height:11px"></i></button>`:''}
         </div>
       </div>`).join('')||'<div class="empty-state" style="padding:40px"><i data-lucide="inbox" style="width:40px;height:40px"></i><p>No materials uploaded yet</p></div>'}
   </div></div>`;
   lucide.createIcons();
 };
+// Opens an uploaded file in a new tab and pings the download counter in the
+// background (fire-and-forget — a failed counter update shouldn't block the
+// person from getting their file).
+function downloadFile(url, id, kind) {
+  window.open(url, '_blank');
+  const path = kind === 'material' ? `/api/materials/${id}/download` : `/api/repository/${id}/download`;
+  api('POST', path).catch(() => {});
+}
 function openCourseMaterials(id,title) { window._activeCourse={courseId:id,courseTitle:title}; showPage('coursematerials'); }
 function viewMaterial(title,content) {
   openModal(title,`<div style="background:var(--input-bg);border-radius:8px;padding:16px;font-size:13px;line-height:1.7;color:rgba(255,255,255,0.75);white-space:pre-wrap;max-height:400px;overflow-y:auto">${esc(content)}</div>`,[{label:'Close',cls:'btn-secondary',action:'close'}]);
@@ -754,13 +795,13 @@ PAGES.materials = async (el) => {
     <div class="search-bar"><i data-lucide="search" style="width:15px;height:15px;color:var(--muted2);flex-shrink:0"></i><input type="text" placeholder="Search materials..." oninput="filterMats(this.value)"/></div>
   </div>
   <div class="card"><div class="table-wrap"><table>
-    <thead><tr><th>Title</th><th>Type</th><th>Course</th><th>Uploaded By</th><th>Date</th>${user.role!=='student'?'<th></th>':''}</tr></thead>
+    <thead><tr><th>Title</th><th>Type</th><th>Course</th><th>Uploaded By</th><th>Date</th><th></th>${user.role!=='student'?'<th></th>':''}</tr></thead>
     <tbody id="matBody">${renderMatRows(mats)}</tbody>
   </table></div></div>`;
   lucide.createIcons();
 };
 function renderMatRows(arr) {
-  if(!arr.length) return `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No materials found</td></tr>`;
+  if(!arr.length) return `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No materials found</td></tr>`;
   return arr.map(m=>`
     <tr>
       <td><div style="display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;background:${typeBg(m.type)};border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="${typeIcon(m.type)}" style="color:${typeColor(m.type)};width:14px;height:14px"></i></div><div><div style="font-weight:600;font-size:13px">${esc(m.title)}</div><div style="color:var(--muted);font-size:11px">${esc(m.description||'')}</div></div></div></td>
@@ -768,6 +809,7 @@ function renderMatRows(arr) {
       <td style="color:var(--muted);font-size:12px"><div style="font-weight:600">${esc(m.course_code||'—')}</div><div style="color:rgba(255,255,255,0.3);font-size:11px">${esc(m.course_title||'')}</div></td>
       <td style="font-size:12px">${esc(m.uploader_name||'—')}</td>
       <td style="color:var(--muted);font-size:12px">${fmtTime(m.created_at)}</td>
+      ${m.file_url?`<td><button class="btn btn-xs btn-secondary" onclick="downloadFile('${esc(m.file_url)}',${m.id},'material')"><i data-lucide="download" style="width:11px;height:11px"></i></button></td>`:'<td></td>'}
       ${user.role!=='student'?`<td><button class="btn btn-xs btn-danger" onclick="deleteMaterial(${m.id},'materials')"><i data-lucide="trash-2" style="width:11px;height:11px"></i></button></td>`:''}
     </tr>`).join('');
 }
@@ -777,11 +819,19 @@ function openAddMaterial(courseId) {
   openModal('Upload Material',`
     <div class="form-group"><label>Title</label><input type="text" id="m_title" placeholder="Material title"/></div>
     <div class="form-group"><label>Description</label><input type="text" id="m_desc" placeholder="Brief description"/></div>
-    <div class="form-row"><div class="form-group"><label>Type</label><select id="m_type"><option value="note">Lecture Note</option><option value="assignment">Assignment</option><option value="slide">Slide</option><option value="video">Video Link</option><option value="quiz">Quiz</option><option value="other">Other</option></select></div><div class="form-group"><label>File Name</label><input type="text" id="m_fname" placeholder="document.pdf"/></div></div>
-    <div class="form-group"><label>Content / Text</label><textarea id="m_content" placeholder="Paste content, instructions, or notes here..." style="min-height:120px"></textarea></div>
+    <div class="form-group"><label>Type</label><select id="m_type"><option value="note">Lecture Note</option><option value="assignment">Assignment</option><option value="slide">Slide</option><option value="video">Video Link</option><option value="quiz">Quiz</option><option value="other">Other</option></select></div>
+    <div class="form-group"><label>File (PDF, Word, PowerPoint, Excel, image — optional)</label><input type="file" id="m_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.png,.jpg,.jpeg"/></div>
+    <div id="m_uploadStatus" style="font-size:12px;color:var(--muted);margin-top:4px"></div>
+    <div class="form-group"><label>Content / Text (optional)</label><textarea id="m_content" placeholder="Paste content, instructions, or notes here..." style="min-height:120px"></textarea></div>
   `,[
     {label:'Cancel',cls:'btn-secondary',action:'close'},
-    {label:'Upload',cls:'btn-primary',action:async()=>{await api('POST','/api/materials',{title:document.getElementById('m_title').value,description:document.getElementById('m_desc').value,type:document.getElementById('m_type').value,file_name:document.getElementById('m_fname').value,content:document.getElementById('m_content').value,course_id:courseId});toast('Uploaded');closeModal();showPage('coursematerials');}},
+    {label:'Upload',cls:'btn-primary',action:async()=>{
+      const file = document.getElementById('m_file').files[0];
+      const payload = {title:document.getElementById('m_title').value,description:document.getElementById('m_desc').value,type:document.getElementById('m_type').value,content:document.getElementById('m_content').value,course_id:courseId};
+      if (file) Object.assign(payload, await uploadToBlob(file, 'materials', 'm_uploadStatus'));
+      await api('POST','/api/materials',payload);
+      toast('Uploaded'); closeModal(); showPage('coursematerials');
+    }},
   ]);
 }
 async function deleteMaterial(id, returnPage) { if(!confirm('Delete this material?'))return; await api('DELETE',`/api/materials/${id}`); toast('Deleted'); showPage(returnPage||'materials'); }
@@ -827,6 +877,7 @@ function renderRepoItems(arr) {
           </div>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0">
+          ${r.file_url?`<button class="btn btn-xs btn-secondary" onclick="downloadFile('${esc(r.file_url)}',${r.id},'repository')"><i data-lucide="download" style="width:11px;height:11px"></i>${esc(r.file_name||'File')}</button>`:''}
           ${user.role==='admin'&&!r.approved?`<button class="btn btn-xs btn-green" onclick="approveRepo(${r.id})"><i data-lucide="check" style="width:11px;height:11px"></i>Approve</button>`:''}
           ${user.role!=='student'?`<button class="btn btn-xs btn-danger" onclick="deleteRepo(${r.id})"><i data-lucide="trash-2" style="width:11px;height:11px"></i></button>`:''}
         </div>
@@ -847,10 +898,17 @@ function openAddRepo() {
     <div class="form-group"><label>Category</label><select id="m_cat"><option value="research">Research Paper</option><option value="thesis">Thesis/Dissertation</option><option value="journal">Journal Article</option><option value="conference">Conference Paper</option><option value="manual">Manual/Report</option><option value="other">Other</option></select></div>
     <div class="form-group"><label>Abstract</label><textarea id="m_abstract" placeholder="Brief abstract..." style="min-height:100px"></textarea></div>
     <div class="form-group"><label>Keywords (comma-separated)</label><input type="text" id="m_kw" placeholder="education, ICT, Nigeria"/></div>
-    <div class="form-group"><label>File Name (optional)</label><input type="text" id="m_fname" placeholder="paper.pdf"/></div>
+    <div class="form-group"><label>File (PDF or Word document — optional)</label><input type="file" id="m_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"/></div>
+    <div id="m_uploadStatus" style="font-size:12px;color:var(--muted);margin-top:4px"></div>
   `,[
     {label:'Cancel',cls:'btn-secondary',action:'close'},
-    {label:'Submit',cls:'btn-primary',action:async()=>{await api('POST','/api/repository',{title:document.getElementById('m_title').value,authors:document.getElementById('m_authors').value,year:parseInt(document.getElementById('m_year').value),category:document.getElementById('m_cat').value,abstract:document.getElementById('m_abstract').value,keywords:document.getElementById('m_kw').value,file_name:document.getElementById('m_fname').value});toast('Submitted for approval');closeModal();showPage('repository');}},
+    {label:'Submit',cls:'btn-primary',action:async()=>{
+      const file = document.getElementById('m_file').files[0];
+      const payload = {title:document.getElementById('m_title').value,authors:document.getElementById('m_authors').value,year:parseInt(document.getElementById('m_year').value),category:document.getElementById('m_cat').value,abstract:document.getElementById('m_abstract').value,keywords:document.getElementById('m_kw').value};
+      if (file) Object.assign(payload, await uploadToBlob(file, 'repository', 'm_uploadStatus'));
+      await api('POST','/api/repository',payload);
+      toast('Submitted for approval'); closeModal(); showPage('repository');
+    }},
   ]);
 }
 async function approveRepo(id) { await api('POST',`/api/repository/${id}/approve`); toast('Approved!'); showPage('repository'); }

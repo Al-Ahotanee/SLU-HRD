@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const { handleUpload } = require('@vercel/blob/client');
 const db = require('./db');
 
 const app = express();
@@ -67,6 +68,39 @@ app.post('/api/auth/register', h(async (req, res) => {
 
 app.get('/api/auth/me', auth, h(async (req, res) => res.json(await db.getUserById(req.user.id))));
 
+// FILE UPLOADS
+// Client uploads go directly from the browser to Vercel Blob storage — the
+// file bytes never pass through this serverless function (which has a small
+// request-body limit). This route only ever sees small JSON messages: a
+// request for a short-lived upload token, scoped to safe file types/size.
+const ALLOWED_UPLOAD_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/plain',
+  'image/png',
+  'image/jpeg',
+];
+const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // 50MB
+
+app.post('/api/upload', auth, h(async (req, res) => {
+  const jsonResponse = await handleUpload({
+    body: req.body,
+    request: req,
+    onBeforeGenerateToken: async (pathname) => ({
+      allowedContentTypes: ALLOWED_UPLOAD_TYPES,
+      maximumSizeInBytes: MAX_UPLOAD_BYTES,
+      addRandomSuffix: true,
+      tokenPayload: JSON.stringify({ userId: req.user.id }),
+    }),
+  });
+  res.json(jsonResponse);
+}));
+
 // USERS
 app.get('/api/users', auth, adminOnly, h(async (req, res) => res.json(await db.getAllUsers(req.query.role))));
 app.post('/api/users', auth, adminOnly, h(async (req, res) => {
@@ -125,9 +159,9 @@ app.post('/api/courses/:id/enroll', auth, h(async (req, res) => {
 app.get('/api/courses/:id/materials', auth, h(async (req, res) => res.json(await db.getMaterialsByCourse(req.params.id))));
 app.get('/api/materials', auth, h(async (req, res) => res.json(await db.getAllMaterials())));
 app.post('/api/materials', auth, staffOnly, h(async (req, res) => {
-  const { title, description, type, file_name, file_size, content, course_id } = req.body;
+  const { title, description, type, file_name, file_size, file_url, file_type, content, course_id } = req.body;
   if (!title || !type || !course_id) return res.status(400).json({ error: 'Title, type, course_id required' });
-  const id = await db.createMaterial({ title, description, type, file_name, file_size, content, course_id, uploaded_by: req.user.id });
+  const id = await db.createMaterial({ title, description, type, file_name, file_size, file_url, file_type, content, course_id, uploaded_by: req.user.id });
   res.json({ success: true, id });
 }));
 app.delete('/api/materials/:id', auth, staffOnly, h(async (req, res) => { await db.deleteMaterial(req.params.id); res.json({ success: true }); }));
@@ -139,12 +173,13 @@ app.get('/api/repository', auth, h(async (req, res) => {
   res.json(await db.getRepository(approved));
 }));
 app.post('/api/repository', auth, h(async (req, res) => {
-  const { title, abstract, authors, category, file_name, keywords, year } = req.body;
+  const { title, abstract, authors, category, file_name, file_url, file_type, keywords, year } = req.body;
   if (!title || !category) return res.status(400).json({ error: 'Title and category required' });
-  const id = await db.createRepoEntry({ title, abstract, authors, category, file_name, keywords, year, submitted_by: req.user.id });
+  const id = await db.createRepoEntry({ title, abstract, authors, category, file_name, file_url, file_type, keywords, year, submitted_by: req.user.id });
   res.json({ success: true, id });
 }));
 app.post('/api/repository/:id/approve', auth, adminOnly, h(async (req, res) => { await db.approveRepo(req.params.id, req.user.id); res.json({ success: true }); }));
+app.post('/api/repository/:id/download', auth, h(async (req, res) => { await db.incrementRepoDownload(req.params.id); res.json({ success: true }); }));
 app.delete('/api/repository/:id', auth, staffOnly, h(async (req, res) => { await db.deleteRepo(req.params.id); res.json({ success: true }); }));
 
 // STAFF DEV
