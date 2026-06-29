@@ -1,3 +1,8 @@
+// Loads a local .env file when one exists (local dev). On Vercel this is a
+// harmless no-op — Vercel injects real environment variables directly, and
+// dotenv never overwrites a variable that's already set.
+require('dotenv').config();
+
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
